@@ -1,0 +1,419 @@
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-10">
+      <div class="card shadow-lg border-0" style="border-radius: 1rem;">
+        <div class="card-header bg-white border-0 py-4">
+          <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center">
+              <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                <i class="fas fa-shopping-cart text-white fa-lg"></i>
+              </div>
+              <div>
+                <h3 class="fw-bold text-dark mb-1">تفاصيل الطلب رقم {{ orderId }}</h3>
+                <p class="text-muted mb-0">معلومات الطلب والأدوية المطلوبة</p>
+              </div>
+            </div>
+            <button class="btn btn-outline-secondary" routerLink="/dashboard/home">
+              <i class="fas fa-arrow-right me-2"></i>
+              العودة للوحة التحكم
+            </button>
+          </div>
+        </div>
+        
+        <div class="card-body p-4">
+          <!-- Loading State -->
+          <div *ngIf="loading" class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3">جاري تحميل تفاصيل الطلب... ستظهر التفاصيل قريباً</p>
+          </div>
+
+          <!-- Error State -->
+          <div *ngIf="error" class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            {{ error }}
+          </div>
+
+          <!-- Order Details Content -->
+          <div *ngIf="!loading && !error && order">
+            <div class="row">
+              <!-- Order Information -->
+              <div class="col-md-6 mb-4">
+                <div class="card border-0" style="background-color: #f8fafc;">
+                  <div class="card-body">
+                    <h5 class="fw-bold text-primary mb-3">
+                      <i class="fas fa-info-circle me-2"></i>
+                      معلومات الطلب
+                    </h5>
+                    <table class="table table-borderless">
+                      <tr>
+                        <td class="fw-semibold text-dark">رقم الطلب:</td>
+                        <td><span class="badge bg-secondary">{{ order.orderId }}</span></td>
+                      </tr>
+                      <tr>
+                        <td class="fw-semibold text-dark">اسم الصيدلية:</td>
+                        <td>{{ order.pharmacyName }}</td>
+                      </tr>
+                      <tr>
+                        <td class="fw-semibold text-dark">تاريخ الطلب:</td>
+                        <td>
+                          <span class="fw-bold text-primary" *ngIf="order.orderDate">
+                            {{ formatOrderDate(order.orderDate) }}
+                          </span>
+                          <span class="fw-bold text-warning" *ngIf="!order.orderDate">
+                            تاريخ غير متوفر
+                          </span>
+                          <br>
+                          <small class="text-muted" *ngIf="order.orderDate">
+                            {{ order.orderDate | date:'shortTime':'':'ar' }}
+                          </small>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="fw-semibold text-dark">الحالة:</td>
+                        <td>
+                          <span class="badge" 
+                                [class.bg-primary]="order.status === 'Ordered'"
+                                [class.bg-warning]="order.status === 'Preparing'"
+                                [class.bg-info]="order.status === 'Delivering'"
+                                [class.bg-success]="order.status === 'Delivered'"
+                                [class.bg-danger]="order.status === 'Cancelled'"
+                                [class.bg-secondary]="order.status === 'Returned'">
+                            {{ getOrderStatusText(order.status) }}
+                          </span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td class="fw-semibold text-dark">الكمية الإجمالية:</td>
+                        <td><span class="badge bg-info">{{ order.quantity }}</span></td>
+                      </tr>
+                      <tr>
+                        <td class="fw-semibold text-dark">المبلغ الإجمالي:</td>
+                        <td><span class="fw-bold text-success">${{ order.totalPrice.toFixed(2) }}</span></td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Order Summary -->
+              <div class="col-md-6 mb-4">
+                <div class="card border-0" style="background-color: #f8fafc;">
+                  <div class="card-body">
+                    <h5 class="fw-bold text-primary mb-3">
+                      <i class="fas fa-chart-pie me-2"></i>
+                      ملخص الطلب
+                    </h5>
+                    <div class="row text-center">
+                      <div class="col-6">
+                        <div class="p-3">
+                          <div class="h3 fw-bold text-primary">{{ order.medicines.length }}</div>
+                          <small class="text-muted">عدد الأدوية</small>
+                        </div>
+                      </div>
+                      <div class="col-6">
+                        <div class="p-3">
+                          <div class="h3 fw-bold text-success">{{ order.quantity }}</div>
+                          <small class="text-muted">إجمالي الكمية</small>
+                        </div>
+                      </div>
+                    </div>
+                    <hr>
+                    <div class="text-center">
+                      <div class="h4 fw-bold text-dark">${{ order.totalPrice.toFixed(2) }}</div>
+                      <small class="text-muted">المبلغ الإجمالي</small>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Medicines List -->
+            <div class="card border-0" style="background-color: #f8fafc;">
+              <div class="card-body">
+                <h5 class="fw-bold text-primary mb-3">
+                  <i class="fas fa-pills me-2"></i>
+                  الأدوية المطلوبة
+                </h5>
+                <div class="table-responsive">
+                  <table class="table table-hover">
+                    <thead class="table-light">
+                      <tr>
+                        <th>رقم الدواء</th>
+                        <th>الكمية</th>
+                        <th>السعر</th>
+                        <th>المجموع</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let medicine of order.medicines">
+                        <td>
+                          <div class="d-flex align-items-center">
+                            <span class="badge bg-secondary me-2">{{ medicine.medicineId }}</span>
+                            <span class="fw-bold text-primary">{{ medicine.medicineName }}</span>
+                          </div>
+                        </td>
+                        <td>
+                          <span class="badge bg-info">{{ medicine.quantity }}</span>
+                        </td>
+                        <td>${{ medicine.price.toFixed(2) }}</td>
+                        <td>
+                          <span class="fw-bold text-success">${{ (medicine.quantity * medicine.price).toFixed(2) }}</span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Show More Details Button - Always visible when order exists -->
+            <div class="text-center mt-4 mb-3" *ngIf="order && !loading && !error">
+              <button class="btn btn-outline-primary me-3 btn-lg fw-bold" (click)="toggleAdditionalDetails()">
+                <i class="fas me-2" [class.fa-chevron-down]="!showAdditionalDetails" [class.fa-chevron-up]="showAdditionalDetails"></i>
+                {{ showAdditionalDetails ? 'إخفاء التفاصيل الإضافية' : 'عرض التفاصيل الإضافية' }}
+              </button>
+              <button class="btn btn-outline-info btn-lg fw-bold" (click)="toggleAllDetails()">
+                <i class="fas me-2" [class.fa-chevron-down]="!showAllDetails" [class.fa-chevron-up]="showAllDetails"></i>
+                {{ showAllDetails ? 'إخفاء جميع التفاصيل' : 'عرض جميع التفاصيل' }}
+              </button>
+            </div>
+
+            <!-- All Details Section -->
+            <div class="card border-0" style="background-color: #f8fafc;" *ngIf="showAllDetails && order && !loading && !error">
+              <div class="card-body">
+                <h5 class="fw-bold text-primary mb-3">
+                  <i class="fas fa-list-alt me-2"></i>
+                  جميع تفاصيل الطلب
+                </h5>
+                
+                <div class="row">
+                  <!-- Complete Order Information -->
+                  <div class="col-md-6 mb-3">
+                    <div class="card border-0 bg-light">
+                      <div class="card-body">
+                        <h6 class="fw-bold text-dark mb-3">
+                          <i class="fas fa-info-circle me-2"></i>
+                          معلومات الطلب الكاملة
+                        </h6>
+                        <table class="table table-sm table-borderless">
+                          <tr>
+                            <td class="fw-semibold text-dark">رقم الطلب:</td>
+                            <td><span class="badge bg-secondary">{{ order.orderId }}</span></td>
+                          </tr>
+                          <tr>
+                            <td class="fw-semibold text-dark">معرف الصيدلية:</td>
+                            <td><span class="badge bg-info">{{ order.pharmacyId }}</span></td>
+                          </tr>
+                          <tr>
+                            <td class="fw-semibold text-dark">اسم الصيدلية:</td>
+                            <td>{{ order.pharmacyName }}</td>
+                          </tr>
+                          <tr>
+
+                          <tr>
+                            <td class="fw-semibold text-dark">الحالة الحالية:</td>
+                            <td>
+                              <span class="badge" [class.bg-primary]="order.status === 'Ordered'" [class.bg-warning]="order.status === 'Preparing'" [class.bg-info]="order.status === 'Delivering'" [class.bg-success]="order.status === 'Delivered'" [class.bg-danger]="order.status === 'Cancelled'" [class.bg-secondary]="order.status === 'Returned'">
+                                {{ getOrderStatusText(order.status) }}
+                              </span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class="fw-semibold text-dark">الكمية الإجمالية:</td>
+                            <td><span class="badge bg-info">{{ order.quantity }}</span></td>
+                          </tr>
+                          <tr>
+                            <td class="fw-semibold text-dark">المبلغ الإجمالي:</td>
+                            <td><span class="fw-bold text-success">${{ order.totalPrice.toFixed(2) }}</span></td>
+                          </tr>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Order Analytics -->
+                  <div class="col-md-6 mb-3">
+                    <div class="card border-0 bg-light">
+                      <div class="card-body">
+                        <h6 class="fw-bold text-dark mb-3">
+                          <i class="fas fa-chart-line me-2"></i>
+                          تحليل الطلب
+                        </h6>
+                        <div class="row text-center">
+                          <div class="col-6">
+                            <div class="p-2">
+                              <div class="h4 fw-bold text-primary">{{ order.medicines.length }}</div>
+                              <small class="text-muted">عدد الأدوية</small>
+                            </div>
+                          </div>
+                          <div class="col-6">
+                            <div class="p-2">
+                              <div class="h4 fw-bold text-success">{{ order.quantity }}</div>
+                              <small class="text-muted">إجمالي الكمية</small>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row text-center mt-2">
+                          <div class="col-6">
+                            <div class="p-2">
+                              <div class="h4 fw-bold text-info">${{ (order.totalPrice / order.medicines.length).toFixed(2) }}</div>
+                              <small class="text-muted">متوسط سعر الدواء</small>
+                            </div>
+                          </div>
+                          <div class="col-6">
+                            <div class="p-2">
+                              <div class="h4 fw-bold text-warning">{{ (order.quantity / order.medicines.length).toFixed(1) }}</div>
+                              <small class="text-muted">متوسط الكمية</small>
+                            </div>
+                          </div>
+                        </div>
+                        <hr>
+                        <div class="text-center">
+                          <div class="h5 fw-bold text-dark">${{ order.totalPrice.toFixed(2) }}</div>
+                          <small class="text-muted">المبلغ الإجمالي</small>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Complete Medicine Details -->
+                <div class="card border-0 bg-light mt-3">
+                  <div class="card-body">
+                    <h6 class="fw-bold text-dark mb-3">
+                      <i class="fas fa-pills me-2"></i>
+                      تفاصيل الأدوية الكاملة
+                    </h6>
+                    <div class="table-responsive">
+                      <table class="table table-sm">
+                        <thead class="table-light">
+                          <tr>
+                            <th>#</th>
+                            <th>رقم الدواء</th>
+                            <th>اسم الدواء</th>
+                            <th>الكمية</th>
+                            <th>السعر الوحدة</th>
+                            <th>المجموع</th>
+                            <th>النسبة المئوية</th>
+                            <th>الحالة</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let medicine of order.medicines; let i = index">
+                            <td>
+                              <span class="badge bg-secondary">{{ i + 1 }}</span>
+                            </td>
+                            <td>
+                              <span class="badge bg-primary">{{ medicine.medicineId }}</span>
+                            </td>
+                            <td>
+                              <span class="fw-bold text-primary">{{ medicine.medicineName }}</span>
+                            </td>
+                            <td>
+                              <span class="badge bg-info">{{ medicine.quantity }}</span>
+                            </td>
+                            <td>
+                              <span class="fw-bold text-primary">${{ medicine.price.toFixed(2) }}</span>
+                            </td>
+                            <td>
+                              <span class="fw-bold text-success">${{ (medicine.quantity * medicine.price).toFixed(2) }}</span>
+                            </td>
+                            <td>
+                              <div class="progress" style="height: 20px;">
+                                <div class="progress-bar bg-primary" 
+                                     [style.width.%]="((medicine.quantity * medicine.price) / order.totalPrice * 100).toFixed(1)">
+                                  {{ ((medicine.quantity * medicine.price) / order.totalPrice * 100).toFixed(1) }}%
+                                </div>
+                              </div>
+                            </td>
+                            <td>
+                              <span class="badge bg-success">متوفر</span>
+                            </td>
+                          </tr>
+                        </tbody>
+                        <tfoot class="table-light">
+                          <tr>
+                            <td colspan="5" class="fw-bold text-end">المجموع الإجمالي:</td>
+                            <td class="fw-bold text-success">${{ order.totalPrice.toFixed(2) }}</td>
+                            <td>
+                              <span class="badge bg-success">100%</span>
+                            </td>
+                            <td></td>
+                          </tr>
+                        </tfoot>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Order Timeline -->
+                <div class="card border-0 bg-light mt-3">
+                  <div class="card-body">
+                    <h6 class="fw-bold text-dark mb-3">
+                      <i class="fas fa-clock me-2"></i>
+                      الجدول الزمني للطلب
+                    </h6>
+                    <div class="timeline">
+                      <div class="timeline-item">
+                        <div class="timeline-marker bg-success"></div>
+                        <div class="timeline-content">
+                          <strong>تاريخ ووقت الطلب:</strong>
+                          <br>
+                          <small class="text-muted">{{ order.orderDate | date:'fullDate':'':'ar' }} - {{ order.orderDate | date:'shortTime':'':'ar' }}</small>
+                        </div>
+                      </div>
+                      <div class="timeline-item">
+                        <div class="timeline-marker" [class.bg-primary]="order.status === 'Ordered'" [class.bg-warning]="order.status === 'Preparing'" [class.bg-info]="order.status === 'Delivering'" [class.bg-success]="order.status === 'Delivered'" [class.bg-danger]="order.status === 'Cancelled'" [class.bg-secondary]="order.status === 'Returned'"></div>
+                        <div class="timeline-content">
+                          <strong>الحالة الحالية:</strong>
+                          <br>
+                          <span class="badge" [class.bg-primary]="order.status === 'Ordered'" [class.bg-warning]="order.status === 'Preparing'" [class.bg-info]="order.status === 'Delivering'" [class.bg-success]="order.status === 'Delivered'" [class.bg-danger]="order.status === 'Cancelled'" [class.bg-secondary]="order.status === 'Returned'">
+                            {{ getOrderStatusText(order.status) }}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex justify-content-between mt-4">
+              <button class="btn btn-outline-secondary" routerLink="/dashboard/home">
+                <i class="fas fa-arrow-right me-2"></i>
+                العودة للوحة التحكم
+              </button>
+              <div>
+                <button class="btn btn-warning me-2" (click)="updateOrderStatus('Preparing')">
+                  <i class="fas fa-cog me-2"></i>
+                  قيد التحضير
+                </button>
+                <button class="btn btn-info me-2" (click)="updateOrderStatus('Delivering')">
+                  <i class="fas fa-truck me-2"></i>
+                  قيد التوصيل
+                </button>
+                <button class="btn btn-success me-2" (click)="updateOrderStatus('Delivered')">
+                  <i class="fas fa-check me-2"></i>
+                  تم التوصيل
+                </button>
+                <button class="btn btn-danger me-2" (click)="updateOrderStatus('Cancelled')">
+                  <i class="fas fa-times me-2"></i>
+                  إلغاء
+                </button>
+                <button class="btn btn-secondary" (click)="updateOrderStatus('Returned')">
+                  <i class="fas fa-undo me-2"></i>
+                  مرتجع
+                </button>
+              </div>
+            </div>
+
+            
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

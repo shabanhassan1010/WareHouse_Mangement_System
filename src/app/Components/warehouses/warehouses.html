@@ -1,1 +1,41 @@
-<p>warehouses works!</p>
+<!-- <div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <h2 class="mb-4">🏭 إدارة المستودعات</h2>
+      <div *ngIf="loading" class="alert alert-info">جاري تحميل الأدوية...</div>
+      <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+      <div *ngIf="!loading && !error">
+        <h5 class="mb-3">قائمة الأدوية في المستودع</h5>
+        <table class="table table-bordered table-striped">
+          <thead>
+            <tr>
+              <th>الرقم</th>
+              <th>اسم الدواء (إنجليزي)</th>
+              <th>اسم الدواء (عربي)</th>
+              <th>الدواء</th>
+              <th>السعر</th>
+              <th>السعر النهائي</th>
+              <th>الكمية</th>
+              <th>الخصم</th>
+              <th>رابط الدواء</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let med of medicines">
+              <td>{{ med.medicineId }}</td>
+              <td>{{ med.englishMedicineName }}</td>
+              <td>{{ med.arabicMedicineName }}</td>
+              <td>{{ med.drug }}</td>
+              <td>{{ med.price }}</td>
+              <td>{{ med.finalprice }}</td>
+              <td>{{ med.quantity }}</td>
+              <td>{{ med.discount }}</td>
+              <td>{{ med.medicineUrl }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div *ngIf="medicines.length === 0" class="alert alert-warning mt-3">لا توجد أدوية في هذا المستودع.</div>
+      </div>
+    </div>
+  </div>
+</div> -->

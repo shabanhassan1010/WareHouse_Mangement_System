@@ -1,0 +1,249 @@
+<div class="container mt-4">
+  <h2 class="mb-4 text-end text-white">جميع الأدوية في المستودع</h2>
+  
+  <!-- Trust Status Alert -->
+  <div class="alert mb-4" [class.alert-info]="checkingTrustStatus" [class.alert-success]="isWarehouseTrusted && !checkingTrustStatus" [class.alert-warning]="!isWarehouseTrusted && !checkingTrustStatus">
+    <i class="fas" [class.fa-spinner]="checkingTrustStatus" [class.fa-check-circle]="isWarehouseTrusted && !checkingTrustStatus" [class.fa-exclamation-triangle]="!isWarehouseTrusted && !checkingTrustStatus"></i>
+    {{ getTrustStatusMessage() }}
+  </div>
+
+  <div class="text-end mb-3">
+  </div>
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="row g-3 justify-content-center">
+        <div class="col-md-4">
+          <div class="input-group">
+            <input type="text" 
+                   class="form-control" 
+                   id="searchInput"
+                   [(ngModel)]="searchTerm"
+                   placeholder="ابحث بالاسم الإنجليزي أو العربي..."
+                   (ngModelChange)="onSearchInput()">
+            <button class="btn btn-outline-secondary" 
+                    type="button"
+                    (click)="clearSearch()"
+                    title="مسح البحث"
+                    *ngIf="searchTerm">
+              <i class="fas fa-times"></i>
+            </button>
+            <button class="btn btn-outline-primary" 
+                    type="button"
+                    (click)="onSearchInput()"
+                    title="بحث"
+                    *ngIf="!searchTerm">
+              <i class="fas fa-search"></i>
+            </button>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" 
+                  id="drugFilter"
+                  [(ngModel)]="selectedDrug"
+                  (change)="onFilterChange()"
+                  (ngModelChange)="onFilterChange()">
+            <option *ngFor="let option of drugOptions" 
+                    [value]="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+          <small class="text-muted">القيمة المحددة: {{ selectedDrug || 'غير محدد' }}</small>
+        </div>
+        <div class="col-md-2">
+          <button class="btn btn-outline-secondary w-100" 
+                  (click)="clearFilters()">
+            <i class="fas fa-times me-2"></i>
+            مسح الفلاتر
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-striped table-hover">
+      <thead class="table-dark">
+        <tr>
+          <th>الرقم</th>
+          <th>اسم الدواء (إنجليزي)</th>
+          <th>اسم الدواء (عربي)</th>
+          <th>النوع</th>
+          <th>السعر</th>
+          <th>السعر النهائي</th>
+          <th>الكمية</th>
+          <th>الخصم</th>
+          <th>الإجراءات</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let medicine of medicines">
+          <td>{{ medicine.medicineId }}</td>
+          <td>{{ medicine.englishMedicineName }}</td>
+          <td>{{ medicine.arabicMedicineName }}</td>
+          <td>
+            <span class="badge" 
+                  [class.bg-primary]="medicine.drug === 0"
+                  [class.bg-info]="medicine.drug === 1"
+                  [class.bg-secondary]="medicine.drug !== 0 && medicine.drug !== 1">
+              {{ getDrugText(medicine.drug) }}
+            </span>
+          </td>
+          <td>{{ medicine.price | currency:'USD' }}</td>
+          <td>{{ medicine.finalprice | currency:'USD' }}</td>
+          <td>
+            <span class="badge" 
+                  [class.bg-success]="medicine.quantity > 10"
+                  [class.bg-warning]="medicine.quantity <= 10 && medicine.quantity > 0"
+                  [class.bg-danger]="medicine.quantity === 0">
+              {{ medicine.quantity }}
+            </span>
+          </td>
+          <td>{{ (medicine.discount * 100) | number:'1.0-0' }}%</td>
+          <td>
+            <div class="btn-group" role="group">
+              <!-- Edit Button - Only for Trusted Warehouses -->
+              <button 
+                class="btn btn-sm btn-outline-primary" 
+                title="تعديل" 
+                [routerLink]="['/dashboard/medicines/edit', medicine.medicineId]"
+                *ngIf="isWarehouseTrusted"
+              >
+                <i class="fas fa-edit"></i>
+              </button>
+              <button 
+                class="btn btn-sm btn-outline-secondary" 
+                title="تعديل غير متاح للمستودع غير الموثوق"
+                *ngIf="!isWarehouseTrusted"
+                disabled
+              >
+                <i class="fas fa-lock"></i>
+              </button>
+              
+              <!-- Delete Button - Only for Trusted Warehouses -->
+              <button 
+                class="btn btn-sm btn-outline-danger" 
+                (click)="confirmDeleteMedicine(medicine.medicineId)"
+                title="حذف"
+                *ngIf="isWarehouseTrusted"
+              >
+                <i class="fas fa-trash"></i>
+              </button>
+              <button 
+                class="btn btn-sm btn-outline-secondary" 
+                title="حذف غير متاح للمستودع غير الموثوق"
+                *ngIf="!isWarehouseTrusted"
+                disabled
+              >
+                <i class="fas fa-lock"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  
+  <!-- No Medicines Message -->
+  <div *ngIf="medicines.length === 0 && !checkingTrustStatus" class="alert alert-info text-center">
+    <i class="fas fa-info-circle me-2"></i>
+    لا توجد أدوية في هذا المستودع
+  </div>
+  <div class="d-flex justify-content-between align-items-center mt-3">
+    <button class="btn btn-primary" [disabled]="currentPage === 1" (click)="prevPage()">الصفحة السابقة</button>
+    <span class="fw-bold">صفحة {{ currentPage }} من {{ totalPages }}</span>
+    <button class="btn btn-primary" [disabled]="currentPage === totalPages" (click)="nextPage()">الصفحة التالية</button>
+  </div>
+  <div class="text-end mt-2 text-white">
+    إجمالي الأدوية: {{ totalCount }}
+  </div>
+</div>
+
+<!-- Custom Delete Confirmation Modal -->
+<div class="modal fade" 
+     [class.show]="showConfirmModal" 
+     [style.display]="showConfirmModal ? 'block' : 'none'"
+     tabindex="-1" 
+     role="dialog"
+     aria-labelledby="deleteModalLabel"
+     aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="deleteModalLabel">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          تأكيد الحذف
+        </h5>
+        <button type="button" 
+                class="btn-close btn-close-white" 
+                (click)="closeDeleteModal()"
+                aria-label="Close">
+        </button>
+      </div>
+      <div class="modal-body text-center">
+        <div class="mb-3">
+          <i class="fas fa-trash-alt fa-3x text-danger mb-3"></i>
+          <h6 class="text-dark">هل أنت متأكد من حذف هذا الدواء؟</h6>
+          <p class="text-muted">لا يمكن التراجع عن هذا الإجراء بعد الحذف.</p>
+        </div>
+        
+        <!-- Medicine Details -->
+        <div class="alert alert-info" *ngIf="medicineToDelete">
+          <div class="row">
+            <div class="col-md-6 text-end">
+              <strong>اسم الدواء:</strong><br>
+              <span class="text-primary">{{ medicineToDelete.englishMedicineName }}</span>
+            </div>
+            <div class="col-md-6 text-end">
+              <strong>الاسم العربي:</strong><br>
+              <span class="text-primary">{{ medicineToDelete.arabicMedicineName }}</span>
+            </div>
+          </div>
+          <div class="row mt-2">
+            <div class="col-md-4 text-end">
+              <strong>النوع:</strong><br>
+              <span class="badge" 
+                    [class.bg-primary]="medicineToDelete.drug === 0"
+                    [class.bg-info]="medicineToDelete.drug === 1">
+                {{ getDrugText(medicineToDelete.drug) }}
+              </span>
+            </div>
+            <div class="col-md-4 text-end">
+              <strong>السعر:</strong><br>
+              <span class="text-success">{{ medicineToDelete.price | currency:'USD' }}</span>
+            </div>
+            <div class="col-md-4 text-end">
+              <strong>الكمية:</strong><br>
+              <span class="badge" 
+                    [class.bg-success]="medicineToDelete.quantity > 10"
+                    [class.bg-warning]="medicineToDelete.quantity <= 10 && medicineToDelete.quantity > 0"
+                    [class.bg-danger]="medicineToDelete.quantity === 0">
+                {{ medicineToDelete.quantity }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <button type="button" 
+                class="btn btn-secondary me-2" 
+                (click)="closeDeleteModal()">
+          <i class="fas fa-times me-2"></i>
+          إلغاء
+        </button>
+        <button type="button" 
+                class="btn btn-danger" 
+                (click)="deleteMedicineConfirmed()"
+                [disabled]="deleting">
+          <i class="fas fa-trash me-2" *ngIf="!deleting"></i>
+          <i class="fas fa-spinner fa-spin me-2" *ngIf="deleting"></i>
+          {{ deleting ? 'جاري الحذف...' : 'حذف الدواء' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Backdrop -->
+<div class="modal-backdrop fade show" 
+     *ngIf="showConfirmModal"
+     (click)="closeDeleteModal()">
+</div> 

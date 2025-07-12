@@ -1,0 +1,135 @@
+/* Modern login styling */
+.card {
+  transition: all 0.3s ease;
+  border: none !important;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
+}
+
+.form-control {
+  border-radius: 0.5rem;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+  padding: 0.75rem 1rem;
+}
+
+.form-control:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+  transform: translateY(-1px);
+}
+
+.input-group-text {
+  border-radius: 0.5rem 0 0 0.5rem;
+  border: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+}
+
+.form-control.border-start-0 {
+  border-left: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+  border: none;
+  transition: all 0.3s ease;
+  padding: 0.75rem 1.5rem;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #0b5ed7 0%, #0a58ca 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(13, 110, 253, 0.3);
+}
+
+.btn-primary:disabled {
+  background: #6c757d;
+  transform: none;
+  box-shadow: none;
+}
+
+.form-check-input {
+  border-radius: 0.25rem;
+  border: 2px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.form-check-input:checked {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+}
+
+.form-check-input:focus {
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.alert {
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.alert-danger {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+}
+
+.text-primary {
+  color: #0d6efd !important;
+  transition: all 0.3s ease;
+}
+
+.text-primary:hover {
+  color: #0b5ed7 !important;
+}
+
+.bg-primary {
+  background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .card-body {
+    padding: 2rem !important;
+  }
+}
+
+/* Smooth animations */
+.spinner-border {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Input group styling */
+.input-group {
+  transition: all 0.3s ease;
+}
+
+.input-group:focus-within {
+  transform: translateY(-1px);
+}
+
+/* Form label styling */
+.form-label {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+/* Error message styling */
+.text-danger {
+  color: #dc2626 !important;
+  font-size: 0.875rem;
+}
+
+/* Card shadow enhancement */
+.shadow-lg {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+}

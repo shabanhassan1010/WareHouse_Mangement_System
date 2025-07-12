@@ -1,0 +1,106 @@
+/* Modern white navigation styling */
+.navbar {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.navbar-brand {
+  color: #1e293b !important;
+  font-weight: 700;
+  transition: all 0.3s ease;
+}
+
+.navbar-brand:hover {
+  color: #2563eb !important;
+  transform: translateY(-1px);
+}
+
+.navbar-nav .nav-link {
+  color: #64748b !important;
+  transition: all 0.3s ease;
+  border-radius: 6px;
+  margin: 0 2px;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+}
+
+.navbar-nav .nav-link:hover {
+  color: #2563eb !important;
+  background-color: #f1f5f9;
+  transform: translateY(-1px);
+}
+
+.navbar-nav .nav-link.active {
+  color: #2563eb !important;
+  background-color: #dbeafe;
+  font-weight: 600;
+}
+
+.navbar-toggler {
+  border: none !important;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+}
+
+.navbar-toggler:focus {
+  box-shadow: none;
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%2837, 99, 235, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Brand icon styling */
+.navbar-brand .bg-primary {
+  background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%) !important;
+  transition: all 0.3s ease;
+  border-radius: 8px;
+}
+
+.navbar-brand:hover .bg-primary {
+  transform: scale(1.05);
+  box-shadow: 0 4px 6px -1px rgba(13, 110, 253, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 991.98px) {
+  .navbar-nav {
+    padding: 1rem 0;
+  }
+  
+  .navbar-nav .nav-link {
+    padding: 0.75rem 1rem;
+    margin: 0.25rem 0;
+  }
+}
+
+/* Modern button styling */
+.btn-outline-primary {
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Clean text styling */
+.text-danger {
+  color: #dc3545 !important;
+}
+
+.text-danger:hover {
+  color: #c82333 !important;
+}
+
+.fw-bold {
+  font-weight: 600 !important;
+}
+
+/* Smooth transitions */
+.navbar, .navbar-brand, .nav-link {
+  transition: all 0.3s ease;
+}

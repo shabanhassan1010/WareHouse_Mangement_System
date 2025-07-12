@@ -1,0 +1,42 @@
+footer {
+  transition: all 0.3s ease;
+}
+
+footer a {
+  transition: all 0.3s ease;
+}
+
+footer a:hover {
+  color: #0d6efd !important;
+  transform: translateX(5px);
+}
+
+footer .social-links a {
+  transition: all 0.3s ease;
+}
+
+footer .social-links a:hover {
+  transform: translateY(-3px);
+  color: #0d6efd !important;
+}
+
+footer .list-unstyled li {
+  transition: all 0.3s ease;
+}
+
+footer .list-unstyled li:hover {
+  transform: translateX(5px);
+}
+
+footer .bg-primary {
+  background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%) !important;
+}
+
+footer .shadow-lg {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+}
+
+footer .rounded-top-4 {
+  border-top-left-radius: 1rem !important;
+  border-top-right-radius: 1rem !important;
+}

@@ -1,0 +1,109 @@
+/* Modern 404 page styling */
+.card {
+  transition: all 0.3s ease;
+  border: none !important;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1) !important;
+}
+
+.display-1 {
+  font-size: 4rem;
+  font-weight: 700;
+  color: #1e293b;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
+  border: none;
+  transition: all 0.3s ease;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #0b5ed7 0%, #0a58ca 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(13, 110, 253, 0.3);
+}
+
+.btn-outline-secondary {
+  border: 2px solid #6c757d;
+  color: #6c757d;
+  transition: all 0.3s ease;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+}
+
+.btn-outline-secondary:hover {
+  background-color: #6c757d;
+  border-color: #6c757d;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(108, 117, 125, 0.3);
+}
+
+.bg-primary {
+  background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%) !important;
+}
+
+.text-dark {
+  color: #1e293b !important;
+}
+
+.text-muted {
+  color: #64748b !important;
+}
+
+.fw-bold {
+  font-weight: 700 !important;
+}
+
+.fw-semibold {
+  font-weight: 600 !important;
+}
+
+/* Icon styling */
+.fa-3x {
+  font-size: 3em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .display-1 {
+    font-size: 3rem;
+  }
+  
+  .card-body {
+    padding: 2rem !important;
+  }
+}
+
+/* Smooth transitions */
+.card, .btn {
+  transition: all 0.3s ease;
+}
+
+/* Card shadow enhancement */
+.shadow-lg {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Animation for the warning icon */
+.bg-primary i {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

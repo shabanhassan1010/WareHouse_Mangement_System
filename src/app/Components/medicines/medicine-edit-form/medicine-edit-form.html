@@ -1,0 +1,91 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-7 col-md-9">
+      <div class="card shadow-lg border-0">
+        <div class="card-body p-4">
+          <h3 class="mb-4 text-end fw-bold text-primary">
+            <i class="fas fa-edit ms-2"></i>
+            تعديل بيانات الدواء
+          </h3>
+
+          <!-- Trust Status Alert -->
+          <div class="alert" [class.alert-info]="checkingTrustStatus" [class.alert-success]="isWarehouseTrusted && !checkingTrustStatus" [class.alert-danger]="!isWarehouseTrusted && !checkingTrustStatus">
+            <i class="fas" [class.fa-spinner]="checkingTrustStatus" [class.fa-check-circle]="isWarehouseTrusted && !checkingTrustStatus" [class.fa-exclamation-triangle]="!isWarehouseTrusted && !checkingTrustStatus"></i>
+            {{ getTrustStatusMessage() }}
+          </div>
+
+          <div *ngIf="loading" class="text-center my-5">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">جاري تحميل بيانات الدواء...</p>
+          </div>
+
+          <div *ngIf="error" class="alert alert-danger text-end">{{ error }}</div>
+
+          <!-- Form for Trusted Warehouses -->
+          <form [formGroup]="medicineForm" (ngSubmit)="onSubmit()" *ngIf="!loading && !error && isWarehouseTrusted" dir="rtl">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold">الكمية</label>
+                <input 
+                  formControlName="quantity" 
+                  class="form-control" 
+                  type="number" 
+                  placeholder="أدخل الكمية"
+                  [class.is-invalid]="medicineForm.get('quantity')?.invalid && medicineForm.get('quantity')?.touched"
+                />
+                <div class="invalid-feedback text-end" *ngIf="getQuantityError()">
+                  {{ getQuantityError() }}
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-bold">الخصم (%)</label>
+                <input 
+                  formControlName="discount" 
+                  class="form-control" 
+                  type="number" 
+                  placeholder="أدخل نسبة الخصم"
+                  [class.is-invalid]="medicineForm.get('discount')?.invalid && medicineForm.get('discount')?.touched"
+                />
+                <div class="invalid-feedback text-end" *ngIf="getDiscountError()">
+                  {{ getDiscountError() }}
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end mt-4">
+              <button type="button" class="btn btn-secondary px-4 py-2 fw-bold me-2" (click)="goBack()">
+                <i class="fas fa-arrow-right ms-2"></i>
+                رجوع إلى القائمة
+              </button>
+              <button 
+                type="submit" 
+                class="btn btn-primary px-5 py-2 fw-bold"
+                [disabled]="submitting || medicineForm.invalid"
+              >
+                <span *ngIf="submitting" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                <i class="fas fa-save ms-2" *ngIf="!submitting"></i>
+                {{ submitting ? 'جاري التحديث...' : 'تحديث' }}
+              </button>
+            </div>
+          </form>
+
+          <!-- Message for Non-Trusted Warehouses -->
+          <div *ngIf="!loading && !error && !isWarehouseTrusted && !checkingTrustStatus" class="text-center my-5">
+            <div class="alert alert-warning">
+              <i class="fas fa-lock me-2"></i>
+              <h5 class="fw-bold">لا يمكن تعديل الأدوية</h5>
+              <p class="mb-3">المستودع غير موثوق. يجب أن يكون المستودع موثوقاً لتتمكن من تعديل الأدوية.</p>
+              <button type="button" class="btn btn-secondary" (click)="goBack()">
+                <i class="fas fa-arrow-right ms-2"></i>
+                رجوع إلى القائمة
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 
