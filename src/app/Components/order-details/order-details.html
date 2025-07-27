@@ -12,6 +12,7 @@
                 <h3 class="fw-bold text-dark mb-1">تفاصيل الطلب رقم {{ orderId }}</h3>
                 <p class="text-muted mb-0">معلومات الطلب والأدوية المطلوبة</p>
               </div>
+
             </div>
             <button class="btn btn-outline-secondary" routerLink="/dashboard/home">
               <i class="fas fa-arrow-right me-2"></i>
@@ -387,23 +388,33 @@
                 العودة للوحة التحكم
               </button>
               <div>
-                <button class="btn btn-warning me-2" (click)="updateOrderStatus('Preparing')">
+                <button class="btn btn-warning me-2" 
+                        (click)="updateOrderStatus('Preparing')"
+                        [disabled]="updatingStatus || !isStatusChangeAllowed('Preparing')">
                   <i class="fas fa-cog me-2"></i>
                   قيد التحضير
                 </button>
-                <button class="btn btn-info me-2" (click)="updateOrderStatus('Delivering')">
+                <button class="btn btn-info me-2" 
+                        (click)="updateOrderStatus('Delivering')"
+                        [disabled]="updatingStatus || !isStatusChangeAllowed('Delivering')">
                   <i class="fas fa-truck me-2"></i>
                   قيد التوصيل
                 </button>
-                <button class="btn btn-success me-2" (click)="updateOrderStatus('Delivered')">
+                <button class="btn btn-success me-2" 
+                        (click)="updateOrderStatus('Delivered')"
+                        [disabled]="updatingStatus || !isStatusChangeAllowed('Delivered')">
                   <i class="fas fa-check me-2"></i>
                   تم التوصيل
                 </button>
-                <button class="btn btn-danger me-2" (click)="updateOrderStatus('Cancelled')">
+                <button class="btn btn-danger me-2" 
+                        (click)="updateOrderStatus('Cancelled')"
+                        [disabled]="updatingStatus">
                   <i class="fas fa-times me-2"></i>
                   إلغاء
                 </button>
-                <button class="btn btn-secondary" (click)="updateOrderStatus('Returned')">
+                <button class="btn btn-secondary" 
+                        (click)="updateOrderStatus('Returned')"
+                        [disabled]="updatingStatus">
                   <i class="fas fa-undo me-2"></i>
                   مرتجع
                 </button>

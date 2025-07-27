@@ -51,24 +51,6 @@
       <div *ngIf="activeTab === 'medicines' && !loading">
         <div class="d-flex justify-content-between align-items-center mb-3">
           <h4>قائمة الأدوية في المستودع</h4>
-          <div>
-            <button class="btn btn-info me-2" (click)="checkAuth()">
-              <i class="fas fa-key me-2"></i>
-              فحص المصادقة
-            </button>
-            <button class="btn btn-warning me-2" (click)="testFetchMedicines()">
-              <i class="fas fa-sync me-2"></i>
-              اختبار الاتصال
-            </button>
-            <button class="btn btn-success me-2" (click)="testFilter('0')">
-              <i class="fas fa-pills me-2"></i>
-              اختبار فلتر أدوية
-            </button>
-            <button class="btn btn-success me-2" (click)="testFilter('1')">
-              <i class="fas fa-spa me-2"></i>
-              اختبار فلتر مستحضرات
-            </button>
-          </div>
         </div>
 
         <!-- Search and Filter Controls -->
@@ -295,67 +277,57 @@
             لا توجد طلبات متاحة. تأكد من الاتصال بالخادم.
           </div>
 
-          <div class="table-responsive">
-            <table class="table table-striped table-hover">
-              <thead class="table-dark">
-                <tr>
-                  <th>رقم الطلب</th>
-                  <th>اسم الصيدلية</th>
-                  <th>تاريخ الطلب</th>
-                  <th>الكمية الإجمالية</th>
-                  <th>المبلغ الإجمالي</th>
-                  <th>الحالة</th>
-                  <th>الإجراءات</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let order of orders">
-                  <td>{{ order.orderId }}</td>
-                  <td>{{ order.pharmacyName }}</td>
-                  <td>{{ order.orderDate | date:'short' }}</td>
-                  <td>{{ order.quantity }}</td>
-                  <td>{{ order.totalPrice | currency:'USD' }}</td>
-                  <td>
-                    <span
-                      class="badge"
-                      [class.bg-primary]="order.status === 'Ordered'"
-                      [class.bg-warning]="order.status === 'Preparing'"
-                      [class.bg-info]="order.status === 'Delivering'"
-                      [class.bg-success]="order.status === 'Delivered'"
-                      [class.bg-danger]="order.status === 'Cancelled'"
-                      [class.bg-secondary]="order.status === 'Returned'"
+        <div class="table-responsive">
+          <table class="table table-striped table-hover">
+            <thead class="table-dark">
+              <tr>
+                <th>رقم الطلب</th>
+                <th>اسم الصيدلية</th>
+                <th>تاريخ الطلب</th>
+                <th>الكمية الإجمالية</th>
+                <th>المبلغ الإجمالي</th>
+                <th>حالة الطلب</th> <!-- New status column -->
+                <th>الإجراءات</th> <!-- Actions column -->
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let order of orders">
+                <td>{{ order.orderId }}</td>
+                <td>{{ order.pharmacyName }}</td>
+                <td>{{ order.orderDate | date:'short' }}</td>
+                <td>{{ order.quantity }}</td>
+                <td>{{ order.totalPrice | currency:'USD' }}</td>
+                
+                <!-- Status Column -->
+                <td>
+                  <span class="badge" 
+                        [class.bg-primary]="order.status === 'Ordered'"
+                        [class.bg-warning]="order.status === 'Preparing'"
+                        [class.bg-info]="order.status === 'Delivering'"
+                        [class.bg-success]="order.status === 'Delivered'"
+                        [class.bg-danger]="order.status === 'Cancelled'"
+                        [class.bg-secondary]="order.status === 'Returned'">
+                    {{ getOrderStatusText(order.status) }}
+                  </span>
+                </td>
+                
+                <!-- Actions Column -->
+                <td>
+                  <div class="btn-group" role="group">
+                    <a
+                      class="btn btn-sm btn-info text-white"
+                      [routerLink]="['/dashboard/order-details', order.orderId]"
+                      title="عرض التفاصيل"
                     >
-                      {{ getOrderStatusText(order.status) }}
-                    </span>
-                  </td>
-                  <td>
-                    <div class="btn-group" role="group">
-                      <select
-                        class="form-select form-select-sm me-2"
-                        (change)="updateOrderStatus(order.orderId, $any($event.target).value)"
-                        [value]="order.status"
-                      >
-                        <option value="Ordered">تم الطلب</option>
-                        <option value="Preparing">قيد التحضير</option>
-                        <option value="Delivering">قيد التوصيل</option>
-                        <option value="Delivered">تم التوصيل</option>
-                        <option value="Cancelled">ملغي</option>
-                        <option value="Returned">مرتجع</option>
-                      </select>
-                      <a
-                        class="btn btn-sm btn-info text-white"
-                        [routerLink]="['/dashboard/order-details', order.orderId]"
-                        title="عرض التفاصيل"
-                      >
-                        <i class="fas fa-eye me-1"></i>
-                        التفاصيل
-                      </a>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+                      <i class="fas fa-eye me-1"></i>
+                      التفاصيل
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
           <div *ngIf="orders.length === 0" class="alert alert-info">
             <i class="fas fa-info-circle me-2"></i>

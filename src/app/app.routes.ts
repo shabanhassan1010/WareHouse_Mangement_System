@@ -10,12 +10,13 @@ import { Profile } from './Components/profile/profile';
 import { MedicinesComponent } from './Components/medicines/medicines';
 
 
+
 export const routes: Routes = 
 [
     {path:'' , component:AuthLayout , children:
     [
         {path:'' , redirectTo:'login' , pathMatch:'full'},
-        {path:'login' ,    component:LoginComponent},
+        {path:'login' , component:LoginComponent},
     ]},
 
     {path:'dashboard', component:BlankLayout , children:
