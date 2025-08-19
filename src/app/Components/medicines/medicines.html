@@ -1,6 +1,6 @@
 <div class="container mt-4">
-  <h2 class="mb-4 text-end text-white">جميع الأدوية في المستودع</h2>
-  
+  <h2 class="mb-4 text-end fw-bold" style="color: #ffffff;">جميع الأدوية في المستودع</h2>
+
   <!-- Trust Status Alert -->
   <div class="alert mb-4" [class.alert-info]="checkingTrustStatus" [class.alert-success]="isWarehouseTrusted && !checkingTrustStatus" [class.alert-warning]="!isWarehouseTrusted && !checkingTrustStatus">
     <i class="fas" [class.fa-spinner]="checkingTrustStatus" [class.fa-check-circle]="isWarehouseTrusted && !checkingTrustStatus" [class.fa-exclamation-triangle]="!isWarehouseTrusted && !checkingTrustStatus"></i>
@@ -13,20 +13,23 @@
     <div class="card-body">
       <div class="row g-3 justify-content-center">
         <div class="col-md-4">
-          <div class="input-group">
-            <input type="text" 
-                   class="form-control" 
-                   id="searchInput"
-                   [(ngModel)]="searchTerm"
-                   placeholder="ابحث بالاسم الإنجليزي أو العربي..."
-                   (ngModelChange)="onSearchInput()">
-            <button class="btn btn-outline-secondary" 
+          <div class="input-group mb-3">
+          <!-- input for s -->
+          <input type="text" 
+                class="form-control w-auto" 
+                id="searchInput"
+                [(ngModel)]="searchTerm"
+                placeholder="ابحث بالاسم الإنجليزي أو العربي..."
+                (ngModelChange)="onSearchInput()">
+
+            <button class="btn btn-outline-secondary me-2" 
                     type="button"
                     (click)="clearSearch()"
                     title="مسح البحث"
                     *ngIf="searchTerm">
               <i class="fas fa-times"></i>
             </button>
+
             <button class="btn btn-outline-primary" 
                     type="button"
                     (click)="onSearchInput()"
@@ -34,6 +37,7 @@
                     *ngIf="!searchTerm">
               <i class="fas fa-search"></i>
             </button>
+
           </div>
         </div>
         <div class="col-md-3">
@@ -59,6 +63,17 @@
       </div>
     </div>
   </div>
+
+  <!-- Add Excel Sheet -->
+<div class="mb-3 d-flex align-items-center justify-content-start">
+  <label class="btn btn-primary mb-0 fw-bold">
+    <i class="fas fa-file-upload me-1"></i>
+    Upload Your Excel Sheet
+    <input type="file" accept=".xls,.xlsx" (change)="onExcelUpload($event)" hidden>
+  </label>
+  <span class="ms-3 text-muted fw-bold" *ngIf="uploadedFileName">{{ uploadedFileName }}</span>
+</div>
+
   <div class="table-responsive">
     <table class="table table-striped table-hover">
       <thead class="table-dark">
@@ -97,7 +112,7 @@
               {{ medicine.quantity }}
             </span>
           </td>
-          <td>{{ (medicine.discount * 100) | number:'1.0-0' }}%</td>
+          <td>{{ (medicine.discount) | number:'1.0-0' }}%</td>
           <td>
             <div class="btn-group" role="group">
               <!-- Edit Button - Only for Trusted Warehouses -->

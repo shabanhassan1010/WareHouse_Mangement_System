@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { OrderService } from '../../Core/Services/order-service';
 
 interface Order {
   orderId: number;
@@ -35,13 +36,12 @@ export class OrderDetails implements OnInit {
   showAllDetails: boolean = false;
   updatingStatus: boolean = false; // Track status update in progress
 
-  // Define valid status progression
-  private statusHierarchy = ['Ordered', 'Preparing', 'Delivering', 'Delivered'];
-  private terminalStatuses = ['Delivered', 'Cancelled', 'Returned'];
+
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router ,
+    private orderService : OrderService
   ) {}
 
   ngOnInit() {
@@ -138,14 +138,18 @@ export class OrderDetails implements OnInit {
       });
   }
 
+   // Define valid status progression
+  private statusHierarchy = ['Ordered', 'Preparing', 'Delivering', 'Delivered'];
+  private terminalStatuses = ['Delivered', 'Cancelled', 'Returned'];
+
   getOrderStatusText(status: string): string {
     switch (status) {
       case 'Ordered': return 'تم الطلب';
       case 'Preparing': return 'قيد التحضير';
       case 'Delivering': return 'قيد التوصيل';
       case 'Delivered': return 'تم التوصيل';
-      case 'Cancelled': return 'ملغي';
       case 'Returned': return 'مرتجع';
+      case 'Cancelled': return 'ملغي';
       default: return status;
     }
   }
@@ -177,6 +181,11 @@ export class OrderDetails implements OnInit {
       return newIndex > currentIndex;
     }
     
+    // the finial status can not go to it
+    if (this.terminalStatuses.includes(currentStatus)) {
+    return false;
+     }
+
     // Allow terminal status changes at any time
     if (this.terminalStatuses.includes(newStatus)) {
       return true;
@@ -213,6 +222,8 @@ export class OrderDetails implements OnInit {
         if (this.order) {
           this.order.status = newStatus;
         }
+            // Notify Home component
+         this.orderService.notifyOrderUpdated(this.order!.orderId);
         alert('تم تحديث حالة الطلب بنجاح');
         this.updatingStatus = false;
       })

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-nav-blank',
@@ -8,5 +8,13 @@ import { RouterModule } from '@angular/router';
   styleUrl: './nav-blank.css'
 })
 export class NavBlank {
+  constructor(private router: Router) {}
 
+ logout() {
+  // مسح كل بيانات الـlocalStorage
+  localStorage.clear();
+
+  // إعادة التوجيه للصفحة الرئيسية أو صفحة تسجيل الدخول
+  this.router.navigate(['/login']);
+}
 }

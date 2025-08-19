@@ -2,6 +2,7 @@ import { Component, OnInit , Inject , PLATFORM_ID  } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule , isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { OrderService } from '../../Core/Services/order-service';
 
 interface Medicine {
   medicineId: number;
@@ -60,7 +61,11 @@ export class Home implements OnInit {
     { value: '1', label: 'مستحضرات تجميل' }
   ];
 
-  constructor(private router: Router ,  @Inject(PLATFORM_ID) private platformId: Object ) {}
+  constructor(
+    private router : Router  ,
+    @Inject(PLATFORM_ID) private platformId: Object,
+    private orderService: OrderService
+    ) {}
 
   getDrugText(drugNumber: number): string {
     switch (drugNumber) {
@@ -87,6 +92,48 @@ export class Home implements OnInit {
       this.fetchMedicines();
       this.fetchOrders();
     }
+      this.orderService.ordersUpdated$.subscribe(orderId => {
+        // البحث عن الطلب في المصفوفة
+        const index = this.orders.findIndex(o => o.orderId === orderId);
+
+        if (index !== -1) {
+          // تحديث هذا الطلب فقط عبر API
+          this.fetchSingleOrder(orderId).then(order => {
+            if (order) this.orders[index] = order;
+          });
+        } else {
+          // إذا لم يكن موجود، نقوم بإعادة جلب جميع الطلبات
+          this.fetchOrders();
+        }
+      });
+  }
+
+  // Helper to fetch a single order by id
+  fetchSingleOrder(orderId: number): Promise<Order | undefined> {
+    const token = localStorage.getItem('authToken');
+    const warehouseData = localStorage.getItem('warehouseData');
+    let warehouseId = '73';
+    
+    if (warehouseData) {
+      try {
+        const warehouse = JSON.parse(warehouseData);
+        warehouseId = warehouse.id || '73';
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    return fetch(`https://localhost:7250/api/Order/warehouse/${warehouseId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(res => res.json())
+      .then((data: Order[]) => {
+        // TypeScript-safe: data is already Order[]
+        return data.find((o: Order) => o.orderId === orderId);
+      });
   }
 
   onSearchInput() {

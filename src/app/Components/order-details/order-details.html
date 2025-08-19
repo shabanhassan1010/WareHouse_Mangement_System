@@ -142,6 +142,7 @@
                     <thead class="table-light">
                       <tr>
                         <th>رقم الدواء</th>
+                        <th>اسم الدواء</th>
                         <th>الكمية</th>
                         <th>السعر</th>
                         <th>المجموع</th>
@@ -152,9 +153,10 @@
                         <td>
                           <div class="d-flex align-items-center">
                             <span class="badge bg-secondary me-2">{{ medicine.medicineId }}</span>
-                            <span class="fw-bold text-primary">{{ medicine.medicineName }}</span>
                           </div>
                         </td>
+                        <td>
+                          <span class="fw-bold text-primary">{{ medicine.medicineName }}</span>
                         <td>
                           <span class="badge bg-info">{{ medicine.quantity }}</span>
                         </td>

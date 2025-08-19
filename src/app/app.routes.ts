@@ -8,6 +8,7 @@ import { Warehouses } from './Components/warehouses/warehouses';
 import { OrderDetails } from './Components/order-details/order-details';
 import { Profile } from './Components/profile/profile';
 import { MedicinesComponent } from './Components/medicines/medicines';
+import { authGuard } from './Core/Guards/auth-guard';
 
 
 
@@ -19,7 +20,9 @@ export const routes: Routes =
         {path:'login' , component:LoginComponent},
     ]},
 
-    {path:'dashboard', component:BlankLayout , children:
+    {path:'dashboard', component:BlankLayout , 
+        canActivate: [authGuard],
+        children:
     [
         {path:'' , redirectTo:'home' , pathMatch:'full'},
         {path:'home' , component:Home},

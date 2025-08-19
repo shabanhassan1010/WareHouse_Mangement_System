@@ -208,4 +208,50 @@ export class MedicinesComponent implements OnInit {
       this.fetchMedicines();
     }
   }
-} 
+
+
+  uploadedFileName: string | null = null;
+
+onExcelUpload(event: any) {
+  const file: File = event.target.files[0];
+  if (!file) return;
+
+  const allowedTypes = [
+    'application/vnd.ms-excel', // .xls
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' // .xlsx
+  ];
+
+  if (!allowedTypes.includes(file.type)) {
+    alert('Invalid file! Please upload an Excel file only (.xls or .xlsx)');
+    event.target.value = ''; // Reset the input
+    this.uploadedFileName = null;
+    return;
+  }
+
+  this.uploadedFileName = file.name;
+
+  // You can send the file to the server using FormData
+  const formData = new FormData();
+  formData.append('file', file);
+
+  // Example of uploading the file to the server
+  const token = localStorage.getItem('authToken');
+  fetch('https://localhost:7250/api/Warehouse/upload-excel', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`
+    },
+    body: formData
+  })
+    .then(res => res.json())
+    .then(data => {
+      alert('File uploaded successfully');
+      this.fetchMedicines(); // Refresh the medicines list after upload
+    })
+    .catch(err => {
+      console.error(err);
+      alert('An error occurred while uploading the file');
+    });
+}
+}
+  
