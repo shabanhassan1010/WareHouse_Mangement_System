@@ -390,36 +390,36 @@
                 العودة للوحة التحكم
               </button>
               <div>
-                <button class="btn btn-warning me-2" 
-                        (click)="updateOrderStatus('Preparing')"
-                        [disabled]="updatingStatus || !isStatusChangeAllowed('Preparing')">
-                  <i class="fas fa-cog me-2"></i>
-                  قيد التحضير
-                </button>
-                <button class="btn btn-info me-2" 
-                        (click)="updateOrderStatus('Delivering')"
-                        [disabled]="updatingStatus || !isStatusChangeAllowed('Delivering')">
-                  <i class="fas fa-truck me-2"></i>
-                  قيد التوصيل
-                </button>
-                <button class="btn btn-success me-2" 
-                        (click)="updateOrderStatus('Delivered')"
-                        [disabled]="updatingStatus || !isStatusChangeAllowed('Delivered')">
-                  <i class="fas fa-check me-2"></i>
-                  تم التوصيل
-                </button>
-                <button class="btn btn-danger me-2" 
-                        (click)="updateOrderStatus('Cancelled')"
-                        [disabled]="updatingStatus">
-                  <i class="fas fa-times me-2"></i>
-                  إلغاء
-                </button>
-                <button class="btn btn-secondary" 
-                        (click)="updateOrderStatus('Returned')"
-                        [disabled]="updatingStatus">
-                  <i class="fas fa-undo me-2"></i>
-                  مرتجع
-                </button>
+              <button class="btn btn-warning order-btn me-2" 
+                      (click)="updateOrderStatus('Preparing')"
+                      [disabled]="updatingStatus || !isStatusChangeAllowed('Preparing')">
+                <i class="fas fa-cog"></i> قيد التحضير
+              </button>
+
+              <button class="btn btn-info order-btn me-2" 
+                      (click)="updateOrderStatus('Delivering')"
+                      [disabled]="updatingStatus || !isStatusChangeAllowed('Delivering')">
+                <i class="fas fa-truck"></i> قيد التوصيل
+              </button>
+
+              <button class="btn btn-success order-btn me-2" 
+                      (click)="updateOrderStatus('Delivered')"
+                      [disabled]="updatingStatus || !isStatusChangeAllowed('Delivered')">
+                <i class="fas fa-check"></i> تم التوصيل
+              </button>
+
+              <button class="btn btn-danger order-btn me-2" 
+                      (click)="updateOrderStatus('Cancelled')"
+                      [disabled]="updatingStatus">
+                <i class="fas fa-times"></i> إلغاء
+              </button>
+
+              <button class="btn btn-secondary order-btn" 
+                      (click)="updateOrderStatus('Returned')"
+                      [disabled]="updatingStatus">
+                <i class="fas fa-undo"></i> مرتجع
+              </button>
+
               </div>
             </div>
 

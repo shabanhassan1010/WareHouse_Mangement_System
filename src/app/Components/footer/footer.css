@@ -7,7 +7,7 @@ footer a {
 }
 
 footer a:hover {
-  color: #0d6efd !important;
+  color: #e3e5e8 !important;
   transform: translateX(5px);
 }
 
@@ -17,7 +17,7 @@ footer .social-links a {
 
 footer .social-links a:hover {
   transform: translateY(-3px);
-  color: #0d6efd !important;
+  color: #82abe9 !important;
 }
 
 footer .list-unstyled li {

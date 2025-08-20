@@ -449,3 +449,32 @@
     font-size: 1.1rem;
   }
 } 
+
+.order-btn {
+  border-radius: 12px !important;
+  padding: 0.75rem 1.25rem !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease-in-out;
+}
+
+.order-btn i {
+  font-size: 1.1rem;
+}
+
+.order-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+  opacity: 0.95;
+}
+
+.order-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}

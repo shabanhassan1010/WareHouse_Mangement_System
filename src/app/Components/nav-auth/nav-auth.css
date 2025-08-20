@@ -1,0 +1,18 @@
+.navbar {
+  background: linear-gradient(135deg, #060606, #d0ebff); /* أزرق فاتح جميل */
+}
+
+.navbar .app-title {
+  color: #f4f5f8;
+}
+
+.navbar .brand-icon {
+  background: white;
+  width: 42px;
+  height: 42px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.navbar .brand-icon i {
+  color: #1971c2; /* أزرق فيروزي */
+}
