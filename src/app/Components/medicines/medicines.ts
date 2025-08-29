@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { RouterModule } from '@angular/router';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-medicines',
@@ -21,26 +22,28 @@ export class MedicinesComponent implements OnInit {
   totalCount: number = 0;
   isWarehouseTrusted: boolean = false;
   checkingTrustStatus: boolean = true;
+  uploading: boolean = false;
 
   // Search and filter
   searchTerm: string = '';
   selectedDrug: string = '';
   drugOptions = [
     { value: '', label: 'كل الأنواع' },
-    { value: '0', label: 'أدوية' },
-    { value: '1', label: 'مستحضرات تجميل' }
+    { value: '1', label: 'أدوية' },
+    { value: '0', label: 'مستحضرات تجميل' }
   ];
 
   showConfirmModal: boolean = false;
   medicineIdToDelete: number | null = null;
   medicineToDelete: any = null;
   deleting: boolean = false;
+  uploadedFileName: string | null = null;
 
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
     const warehouseData = JSON.parse(localStorage.getItem('warehouseData') || '{}');
-    this.warehouseId = warehouseData?.id || '73'; // fallback for testing
+    this.warehouseId = warehouseData?.id || '73';
     this.checkWarehouseTrustStatus();
   }
 
@@ -64,14 +67,12 @@ export class MedicinesComponent implements OnInit {
         this.isWarehouseTrusted = data.isTrusted || false;
         this.checkingTrustStatus = false;
         
-        // Proceed to fetch medicines regardless of trust status
         this.fetchMedicines();
       })
       .catch(err => {
         console.error('Error checking warehouse trust status:', err);
         this.isWarehouseTrusted = false;
         this.checkingTrustStatus = false;
-        // Still fetch medicines but mark as non-trusted
         this.fetchMedicines();
       });
   }
@@ -127,12 +128,9 @@ export class MedicinesComponent implements OnInit {
 
   getDrugText(drug: number): string {
     switch (drug) {
-      case 0:
-        return 'دواء';
-      case 1:
-        return 'مستحضرات تجميل';
-      default:
-        return 'غير محدد';
+      case 0:  return 'مستحضرات تجميل';
+      case 1:  return 'دواء';
+      default: return 'غير محدد';
     }
   }
 
@@ -142,7 +140,6 @@ export class MedicinesComponent implements OnInit {
       return;
     }
     
-    // Find the medicine details
     this.medicineToDelete = this.medicines.find(m => m.medicineId === medicineId);
     this.medicineIdToDelete = medicineId;
     this.showConfirmModal = true;
@@ -173,6 +170,8 @@ export class MedicinesComponent implements OnInit {
     this.http.delete(`https://localhost:7250/api/WarehouseMedicine/DeleteMedicine/${medicineId}?warehouseId=${warehouseId}`).subscribe({
       next: () => {
         this.medicines = this.medicines.filter(m => m.medicineId !== medicineId);
+        this.allMedicines = this.allMedicines.filter(m => m.medicineId !== medicineId);
+        this.totalCount--;
         this.closeDeleteModal();
         alert('تم حذف الدواء بنجاح.');
       },
@@ -190,11 +189,6 @@ export class MedicinesComponent implements OnInit {
     return 'المستودع غير موثوق - لا يمكن تعديل أو حذف الأدوية';
   }
 
-  getTrustStatusClass(): string {
-    if (this.checkingTrustStatus) return 'text-info';
-    return this.isWarehouseTrusted ? 'text-success' : 'text-danger';
-  }
-
   prevPage() {
     if (this.currentPage > 1) {
       this.currentPage--;
@@ -209,49 +203,130 @@ export class MedicinesComponent implements OnInit {
     }
   }
 
+  async onExcelUpload(event: any) {
+    const file: File = event.target.files[0];
+    if (!file) return;
 
-  uploadedFileName: string | null = null;
+    this.uploadedFileName = file.name;
+    this.uploading = true;
 
-onExcelUpload(event: any) {
-  const file: File = event.target.files[0];
-  if (!file) return;
+    try {
+      const fileData = await this.readFileAsync(file);
+      const workbook = XLSX.read(fileData, { type: 'array' });
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(worksheet);
+      console.log("Parsed Excel first row:", data[0]);
 
-  const allowedTypes = [
-    'application/vnd.ms-excel', // .xls
-    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' // .xlsx
-  ];
 
-  if (!allowedTypes.includes(file.type)) {
-    alert('Invalid file! Please upload an Excel file only (.xls or .xlsx)');
-    event.target.value = ''; // Reset the input
-    this.uploadedFileName = null;
-    return;
+      // Filter only items with IsExist = 1
+      const filteredData = data.filter((row: any) => Number(row["IsExist"]) === 1);
+
+      // Prepare data for API
+      const medicinesToUpload = filteredData.map((row: any) => ({
+        medicineId: Number(row["ID"]),
+        quantity: Number(row["Quantity"]),
+        discount: Number(row["Discount"])
+      }));
+
+      // Fetch medicine details and prepare for display
+      const mappedMedicines = await Promise.all(
+        filteredData.map(async (row: any) => {
+          try {
+            const response = await fetch(`https://localhost:7250/api/Warehouse/GetMedicine/${row["ID"]}`, {
+              headers: {
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
+                'Content-Type': 'application/json'
+              }
+            });
+
+            if (!response.ok) {
+              throw new Error(`API error for ID ${row["ID"]}`);
+            }
+
+            const medData = await response.json();
+            console.log("Fetched medicine data:", medData);
+
+            return {
+              medicineId: Number(row["ID"]),
+              arabicMedicineName: row["product_name"],
+              englishMedicineName: row["product_name_en"],
+              drug: this.mapDrugValue(row["drug"]),
+              price: medData.price,
+              finalprice: medData.price - (medData.price * Number(row["Discount"])),
+              quantity: Number(row["Quantity"]),
+              discount: Number(row["Discount"]) * 100
+            };
+          } catch (err) {
+            console.error("Failed to fetch price for medicine:", row["ID"], err);
+            return null;
+          }
+        })
+      );
+
+      const validMedicines = mappedMedicines.filter(m => m !== null);
+      
+      // Update local state immediately
+      const existingIds = new Set(this.allMedicines.map(m => m.medicineId));
+      const newMedicines = validMedicines.filter(m => !existingIds.has(m.medicineId));
+      
+      this.allMedicines = [...this.allMedicines, ...newMedicines];
+      this.totalCount += newMedicines.length;
+      this.applyFilters();
+
+      // Send update to server
+      const url = `https://localhost:7250/api/Warehouse/UpdateWarehouseMedicines/${this.warehouseId}`;
+      const token = localStorage.getItem('authToken');
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(medicinesToUpload)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Server returned ${response.status}: ${errorText}`);
+      }
+
+      alert('✅ تم رفع وتحديث الأدوية بنجاح');
+      
+      // Refresh data from server to ensure consistency
+      this.fetchMedicines();
+      
+    } catch (error) {
+      console.error('Error processing Excel file:', error);
+      alert('❌ حدث خطأ أثناء معالجة ملف Excel: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    } finally {
+      this.uploading = false;
+    }
   }
 
-  this.uploadedFileName = file.name;
-
-  // You can send the file to the server using FormData
-  const formData = new FormData();
-  formData.append('file', file);
-
-  // Example of uploading the file to the server
-  const token = localStorage.getItem('authToken');
-  fetch('https://localhost:7250/api/Warehouse/upload-excel', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${token}`
-    },
-    body: formData
-  })
-    .then(res => res.json())
-    .then(data => {
-      alert('File uploaded successfully');
-      this.fetchMedicines(); // Refresh the medicines list after upload
-    })
-    .catch(err => {
-      console.error(err);
-      alert('An error occurred while uploading the file');
+  private readFileAsync(file: File): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e: any) => resolve(e.target.result);
+      reader.onerror = reject;
+      reader.readAsArrayBuffer(file);
     });
+  }
+
+  private mapDrugValue(value: any): number {
+  if (!value) return -1;
+
+  const strVal = String(value).trim();
+
+  if (strVal === "1") return 1;
+  if (strVal === "0") return 0;
+
+  if (strVal === "دواء" || strVal.toLowerCase() === "medicine") return 1;
+  if (strVal === "مستحضرات تجميل" || strVal.toLowerCase() === "cosmetic") return 0;
+
+  console.warn("⚠️ Drug value غير معروف:", strVal);
+  return -1; 
 }
+
+
 }
-  
