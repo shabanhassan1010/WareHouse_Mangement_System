@@ -77,7 +77,7 @@ export class OrderDetails implements OnInit {
         day: 'numeric'
       });
     } catch (error) {
-      console.error('Error formatting date:', error);
+      // console.error('Error formatting date:', error);
       return 'تاريخ غير صحيح';
     }
   }
@@ -89,14 +89,10 @@ export class OrderDetails implements OnInit {
     const token = localStorage.getItem('authToken');
     const warehouseData = localStorage.getItem('warehouseData');
     
-    let warehouseId = '73';
+    let warehouseId;
     if (warehouseData) {
-      try {
         const warehouse = JSON.parse(warehouseData);
-        warehouseId = warehouse.id || '73';
-      } catch (e) {
-        console.error('Error parsing warehouse data:', e);
-      }
+        warehouseId = warehouse.id ;
     }
 
     fetch(`https://localhost:7250/api/Order/warehouse/${warehouseId}`, {
@@ -132,7 +128,7 @@ export class OrderDetails implements OnInit {
         this.loading = false;
       })
       .catch(error => {
-        console.error('Error loading order details:', error);
+        // console.error('Error loading order details:', error);
         this.error = error.message;
         this.loading = false;
       });
@@ -228,7 +224,7 @@ export class OrderDetails implements OnInit {
         this.updatingStatus = false;
       })
       .catch(error => {
-        console.error('Error updating order status:', error);
+        // console.error('Error updating order status:', error);
         alert('حدث خطأ في تحديث حالة الطلب: ' + error.message);
         this.updatingStatus = false;
       });

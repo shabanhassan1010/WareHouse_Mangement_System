@@ -1,62 +1,68 @@
 {
-  "hash": "dd3dc51c",
-  "configHash": "d7cebda8",
+  "hash": "4d5117b2",
+  "configHash": "5cee432a",
   "lockfileHash": "0e2ea535",
-  "browserHash": "3a5a0638",
+  "browserHash": "33842030",
   "optimized": {
     "@angular/common": {
       "src": "../../../../../../node_modules/@angular/common/fesm2022/common.mjs",
       "file": "@angular_common.js",
-      "fileHash": "6d2d5ea2",
+      "fileHash": "5863e7e6",
       "needsInterop": false
     },
     "@angular/common/http": {
       "src": "../../../../../../node_modules/@angular/common/fesm2022/http.mjs",
       "file": "@angular_common_http.js",
-      "fileHash": "f4a60772",
+      "fileHash": "8a083c92",
       "needsInterop": false
     },
     "@angular/core": {
       "src": "../../../../../../node_modules/@angular/core/fesm2022/core.mjs",
       "file": "@angular_core.js",
-      "fileHash": "c2a0c35d",
+      "fileHash": "dc9bc5d6",
       "needsInterop": false
     },
     "@angular/forms": {
       "src": "../../../../../../node_modules/@angular/forms/fesm2022/forms.mjs",
       "file": "@angular_forms.js",
-      "fileHash": "5ffb053c",
+      "fileHash": "3dde179c",
       "needsInterop": false
     },
     "@angular/platform-browser": {
       "src": "../../../../../../node_modules/@angular/platform-browser/fesm2022/platform-browser.mjs",
       "file": "@angular_platform-browser.js",
-      "fileHash": "de9002b1",
+      "fileHash": "c0e4eaeb",
       "needsInterop": false
     },
     "@angular/router": {
       "src": "../../../../../../node_modules/@angular/router/fesm2022/router.mjs",
       "file": "@angular_router.js",
-      "fileHash": "e5e54751",
+      "fileHash": "0322f160",
       "needsInterop": false
     },
     "rxjs": {
       "src": "../../../../../../node_modules/rxjs/dist/esm5/index.js",
       "file": "rxjs.js",
-      "fileHash": "6e492121",
+      "fileHash": "0c0b7d4b",
       "needsInterop": false
     },
     "xlsx": {
       "src": "../../../../../../node_modules/xlsx/xlsx.mjs",
       "file": "xlsx.js",
-      "fileHash": "7d8273fe",
+      "fileHash": "6774deae",
       "needsInterop": false
     },
     "zone.js": {
       "src": "../../../../../../node_modules/zone.js/fesm2015/zone.js",
       "file": "zone__js.js",
-      "fileHash": "c5671c5b",
+      "fileHash": "f3502013",
       "needsInterop": true
+    },
+    "@angular/common/locales/ar": {
+      "src": "../../../../../../node_modules/@angular/common/locales/ar.js",
+      "file": "@angular_common_locales_ar.js",
+      "fileHash": "378456b2",
+      "needsInterop": false
     }
   },
   "chunks": {

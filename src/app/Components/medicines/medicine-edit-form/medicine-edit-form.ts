@@ -56,7 +56,7 @@ export class MedicineEditFormComponent implements OnInit {
     const warehouseData = JSON.parse(localStorage.getItem('warehouseData') || '{}');
     const warehouseId = warehouseData?.id || this.warehouseId || '73';
     
-    console.log('Checking trust status for warehouse:', warehouseId);
+    // console.log('Checking trust status for warehouse:', warehouseId);
     
     fetch(`https://localhost:7250/api/Warehouse/Getbyid/${warehouseId}`, {
       headers: {
@@ -71,7 +71,7 @@ export class MedicineEditFormComponent implements OnInit {
         return res.json();
       })
       .then(data => {
-        console.log('Warehouse data for trust check:', data);
+        // console.log('Warehouse data for trust check:', data);
         this.isWarehouseTrusted = data.isTrusted || false;
         this.checkingTrustStatus = false;
         
@@ -85,7 +85,7 @@ export class MedicineEditFormComponent implements OnInit {
         this.fetchMedicine();
       })
       .catch(err => {
-        console.error('Error checking warehouse trust status:', err);
+        // console.error('Error checking warehouse trust status:', err);
         this.error = 'فشل في التحقق من حالة الثقة للمستودع';
         this.checkingTrustStatus = false;
         this.loading = false;
@@ -100,7 +100,7 @@ export class MedicineEditFormComponent implements OnInit {
     this.http.get<any>(`https://localhost:7250/api/WarehouseMedicine/GetMedicineById?medicineId=${this.medicineId}&warehouseId=${this.warehouseId}`)
       .subscribe({
         next: (data) => {
-          console.log('API Response:', data);
+          // console.log('API Response:', data);
           
           // Handle different possible field names for discount
           let discountValue = data.discount;
@@ -113,11 +113,7 @@ export class MedicineEditFormComponent implements OnInit {
             discountValue = discountValue * 100;
           }
           
-          console.log('Processed values:', {
-            quantity: data.quantity,
-            discount: discountValue,
-            originalDiscount: data.discount
-          });
+          // console.log('Processed values:', { quantity: data.quantity,discount: discountValue,originalDiscount: data.discount});
           
           // Only patch the fields we want to edit
           this.medicineForm.patchValue({
@@ -127,7 +123,6 @@ export class MedicineEditFormComponent implements OnInit {
           this.loading = false;
         },
         error: (err) => {
-          console.error('Error fetching medicine:', err);
           this.error = 'تعذر تحميل بيانات الدواء. تأكد من صحة المعرف.';
           this.loading = false;
         }
@@ -151,7 +146,7 @@ export class MedicineEditFormComponent implements OnInit {
       discount: this.medicineForm.get('discount')?.value
     };
 
-    console.log('Submitting medicine update:', formData);
+    // console.log('Submitting medicine update:', formData);
 
     this.http.put(
       `https://localhost:7250/api/WarehouseMedicine/UpdateMedicine/${this.medicineId}?warehouseId=${this.warehouseId}`,
@@ -159,12 +154,10 @@ export class MedicineEditFormComponent implements OnInit {
       { responseType: 'text' }
     ).subscribe({
       next: (res) => {
-        console.log('Success:', res);
         alert('تم تحديث الدواء بنجاح.');
         this.router.navigate(['/dashboard/medicines']);
       },
       error: (err) => {
-        console.error('Error updating medicine:', err);
         alert('حدث خطأ أثناء تحديث الدواء. تأكد من صحة البيانات.');
         this.submitting = false;
       }

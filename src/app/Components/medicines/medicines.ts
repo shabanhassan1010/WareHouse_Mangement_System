@@ -45,12 +45,12 @@ export class MedicinesComponent implements OnInit {
     const warehouseData = JSON.parse(
       localStorage.getItem('warehouseData') || '{}'
     );
-    this.warehouseId = warehouseData?.id || '73';
+    this.warehouseId = warehouseData?.id ;
     this.checkWarehouseTrustStatus();
   }
 
   checkWarehouseTrustStatus() {
-    console.log('Checking trust status for warehouse:', this.warehouseId);
+    // console.log('Checking trust status for warehouse:', this.warehouseId);
 
     fetch(`https://localhost:7250/api/Warehouse/Getbyid/${this.warehouseId}`, {
       headers: {
@@ -65,14 +65,14 @@ export class MedicinesComponent implements OnInit {
         return res.json();
       })
       .then((data) => {
-        console.log('Warehouse data for trust check:', data);
+        // console.log('Warehouse data for trust check:', data);
         this.isWarehouseTrusted = data.isTrusted || false;
         this.checkingTrustStatus = false;
 
         this.fetchMedicines();
       })
       .catch((err) => {
-        console.error('Error checking warehouse trust status:', err);
+        // console.error('Error checking warehouse trust status:', err);
         this.isWarehouseTrusted = false;
         this.checkingTrustStatus = false;
         this.fetchMedicines();
@@ -90,7 +90,7 @@ export class MedicinesComponent implements OnInit {
         this.applyFilters();
       })
       .catch((err) => {
-        console.error('API error:', err);
+        // console.error('API error:', err);
       });
   }
 
@@ -197,7 +197,7 @@ export class MedicinesComponent implements OnInit {
         error: (err) => {
           this.deleting = false;
           alert('حدث خطأ أثناء حذف الدواء.');
-          console.error(err);
+          // console.error(err);
         },
       });
   }
@@ -235,7 +235,7 @@ export class MedicinesComponent implements OnInit {
     const workbook = XLSX.read(fileData, { type: 'array' });
     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
     const data = XLSX.utils.sheet_to_json(worksheet);
-    console.log('Parsed Excel first row:', data[0]);
+    // console.log('Parsed Excel first row:', data[0]);
 
     // Filter only items with IsExist = 1
     const filteredData = data.filter(
@@ -268,7 +268,7 @@ export class MedicinesComponent implements OnInit {
           }
 
           const medData = await response.json();
-          console.log('Fetched medicine data:', medData);
+          // console.log('Fetched medicine data:', medData);
 
           return {
             medicineId: Number(row['ID']),
@@ -281,11 +281,11 @@ export class MedicinesComponent implements OnInit {
             discount: Number(row['Discount']) * 100,
           };
         } catch (err) {
-          console.error(
-            'Failed to fetch price for medicine:',
-            row['ID'],
-            err
-          );
+          // console.error(
+          //   'Failed to fetch price for medicine:',
+          //   row['ID'],
+          //   err
+          // );
           return null;
         }
       })
@@ -326,7 +326,7 @@ export class MedicinesComponent implements OnInit {
     // Refresh data from server to ensure consistency
     this.fetchMedicines();
   } catch (error) {
-    console.error('Error processing Excel file:', error);
+    // console.error('Error processing Excel file:', error);
     alert(
       'هذا الملف موجود بالفعل ولم يحدث عليه أي تغييرات، من فضلك قم برفع ملف جديد ..'
     );
@@ -360,7 +360,7 @@ export class MedicinesComponent implements OnInit {
     if (strVal === 'مستحضرات تجميل' || strVal.toLowerCase() === 'cosmetic')
       return 0;
 
-    console.warn('⚠️ Drug value غير معروف:', strVal);
+    // console.warn('⚠️ Drug value غير معروف:', strVal);
     return -1;
   }
 }

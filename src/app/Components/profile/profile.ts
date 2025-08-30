@@ -1,6 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 
 interface WarehouseArea {
@@ -25,7 +30,7 @@ interface Warehouse {
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './profile.html',
-  styleUrls: ['./profile.css']
+  styleUrls: ['./profile.css'],
 })
 export class Profile implements OnInit {
   warehouse: Warehouse | null = null;
@@ -41,7 +46,7 @@ export class Profile implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.required, Validators.pattern(/^[0-9+\-\s()]+$/)]],
       address: ['', [Validators.required, Validators.minLength(5)]],
-      governate: ['', [Validators.required]]
+      governate: ['', [Validators.required]],
     });
   }
 
@@ -59,32 +64,36 @@ export class Profile implements OnInit {
   }
 
   fetchWarehouseData() {
-    const warehouseData = JSON.parse(localStorage.getItem('warehouseData') || '{}');
+    const warehouseData = JSON.parse(
+      localStorage.getItem('warehouseData') || '{}'
+    );
     const warehouseId = warehouseData?.id || '73'; // fallback to 73 as specified
-    
-    console.log('Fetching warehouse data for ID:', warehouseId);
-    
+
+    // console.log('Fetching warehouse data for ID:', warehouseId);
+
     fetch(`https://localhost:7250/api/Warehouse/Getbyid/${warehouseId}`, {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-        'Content-Type': 'application/json'
-      }
+        Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+        'Content-Type': 'application/json',
+      },
     })
-      .then(res => {
-        console.log('Response status:', res.status);
+      .then((res) => {
+        // console.log('Response status:', res.status);
         if (!res.ok) {
-          throw new Error(`فشل في جلب بيانات المستودع: ${res.status} ${res.statusText}`);
+          throw new Error(
+            `فشل في جلب بيانات المستودع: ${res.status} ${res.statusText}`
+          );
         }
         return res.json();
       })
-      .then(data => {
-        console.log('Warehouse data received:', data);
+      .then((data) => {
+        // console.log('Warehouse data received:', data);
         this.warehouse = data;
         this.populateForm();
         this.loading = false;
       })
-      .catch(err => {
-        console.error('Error fetching warehouse data:', err);
+      .catch((err) => {
+        // console.error('Error fetching warehouse data:', err);
         this.error = err.message || 'حدث خطأ أثناء جلب البيانات';
         this.loading = false;
       });
@@ -97,7 +106,7 @@ export class Profile implements OnInit {
         email: this.warehouse.email,
         phone: this.warehouse.phone,
         address: this.warehouse.address,
-        governate: this.warehouse.governate
+        governate: this.warehouse.governate,
       });
     }
   }
@@ -123,39 +132,46 @@ export class Profile implements OnInit {
 
     this.submitting = true;
     const formData = this.warehouseForm.value;
-    
-    console.log('Updating warehouse with data:', formData);
 
-    fetch(`https://localhost:7250/api/Warehouse/UpdateWarehouse/${this.warehouse?.id}`, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(formData)
-    })
-      .then(res => {
+    // console.log('Updating warehouse with data:', formData);
+
+    fetch(
+      `https://localhost:7250/api/Warehouse/UpdateWarehouse/${this.warehouse?.id}`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      }
+    )
+      .then((res) => {
         if (!res.ok) {
-          throw new Error(`فشل في تحديث بيانات المستودع: ${res.status} ${res.statusText}`);
+          throw new Error(
+            `فشل في تحديث بيانات المستودع: ${res.status} ${res.statusText}`
+          );
         }
         return res.json();
       })
-      .then(data => {
-        console.log('Warehouse updated successfully:', data);
+      .then((data) => {
+        // console.log('Warehouse updated successfully:', data);
         this.warehouse = { ...this.warehouse, ...formData };
         this.isEditMode = false;
         this.submitting = false;
         alert('تم تحديث بيانات المستودع بنجاح');
       })
-      .catch(err => {
-        console.error('Error updating warehouse:', err);
+      .catch((err) => {
+        // console.error('Error updating warehouse:', err);
         this.submitting = false;
         alert('حدث خطأ أثناء تحديث البيانات: ' + err.message);
       });
   }
 
   getProfileImage() {
-    return this.warehouse && this.warehouse.imageUrl && this.warehouse.imageUrl !== 'string'
+    return this.warehouse &&
+      this.warehouse.imageUrl &&
+      this.warehouse.imageUrl !== 'string'
       ? this.warehouse.imageUrl
       : 'https://ui-avatars.com/api/?name=Warehouse&background=0D8ABC&color=fff&rounded=true&size=128';
   }
@@ -176,7 +192,8 @@ export class Profile implements OnInit {
     if (control?.errors && control.touched) {
       if (control.errors['required']) return 'هذا الحقل مطلوب';
       if (control.errors['email']) return 'البريد الإلكتروني غير صحيح';
-      if (control.errors['minlength']) return `الحد الأدنى ${control.errors['minlength'].requiredLength} أحرف`;
+      if (control.errors['minlength'])
+        return `الحد الأدنى ${control.errors['minlength'].requiredLength} أحرف`;
       if (control.errors['pattern']) return 'التنسيق غير صحيح';
     }
     return '';
