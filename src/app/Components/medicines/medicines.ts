@@ -10,7 +10,7 @@ import * as XLSX from 'xlsx';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './medicines.html',
-  styleUrls: ['./medicines.css']
+  styleUrls: ['./medicines.css'],
 })
 export class MedicinesComponent implements OnInit {
   medicines: any[] = [];
@@ -30,7 +30,7 @@ export class MedicinesComponent implements OnInit {
   drugOptions = [
     { value: '', label: 'كل الأنواع' },
     { value: '1', label: 'أدوية' },
-    { value: '0', label: 'مستحضرات تجميل' }
+    { value: '0', label: 'مستحضرات تجميل' },
   ];
 
   showConfirmModal: boolean = false;
@@ -42,34 +42,36 @@ export class MedicinesComponent implements OnInit {
   constructor(private http: HttpClient) {}
 
   ngOnInit() {
-    const warehouseData = JSON.parse(localStorage.getItem('warehouseData') || '{}');
+    const warehouseData = JSON.parse(
+      localStorage.getItem('warehouseData') || '{}'
+    );
     this.warehouseId = warehouseData?.id || '73';
     this.checkWarehouseTrustStatus();
   }
 
   checkWarehouseTrustStatus() {
     console.log('Checking trust status for warehouse:', this.warehouseId);
-    
+
     fetch(`https://localhost:7250/api/Warehouse/Getbyid/${this.warehouseId}`, {
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-        'Content-Type': 'application/json'
-      }
+        Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+        'Content-Type': 'application/json',
+      },
     })
-      .then(res => {
+      .then((res) => {
         if (!res.ok) {
           throw new Error(`فشل في جلب بيانات المستودع: ${res.status}`);
         }
         return res.json();
       })
-      .then(data => {
+      .then((data) => {
         console.log('Warehouse data for trust check:', data);
         this.isWarehouseTrusted = data.isTrusted || false;
         this.checkingTrustStatus = false;
-        
+
         this.fetchMedicines();
       })
-      .catch(err => {
+      .catch((err) => {
         console.error('Error checking warehouse trust status:', err);
         this.isWarehouseTrusted = false;
         this.checkingTrustStatus = false;
@@ -80,14 +82,14 @@ export class MedicinesComponent implements OnInit {
   fetchMedicines() {
     const url = `http://localhost:4200/api/Warehouse/GetWarehousMedicines/${this.warehouseId}/medicines?page=${this.currentPage}&pageSize=${this.pageSize}`;
     fetch(url)
-      .then(res => res.json())
-      .then(data => {
+      .then((res) => res.json())
+      .then((data) => {
         this.allMedicines = data.items || [];
         this.totalPages = data.totalPages || 1;
         this.totalCount = data.totalCount || 0;
         this.applyFilters();
       })
-      .catch(err => {
+      .catch((err) => {
         console.error('API error:', err);
       });
   }
@@ -96,13 +98,17 @@ export class MedicinesComponent implements OnInit {
     let filtered = this.allMedicines;
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(med =>
-        (med.englishMedicineName && med.englishMedicineName.toLowerCase().includes(term)) ||
-        (med.arabicMedicineName && med.arabicMedicineName.includes(term))
+      filtered = filtered.filter(
+        (med) =>
+          (med.englishMedicineName &&
+            med.englishMedicineName.toLowerCase().includes(term)) ||
+          (med.arabicMedicineName && med.arabicMedicineName.includes(term))
       );
     }
     if (this.selectedDrug !== '') {
-      filtered = filtered.filter(med => String(med.drug) === this.selectedDrug);
+      filtered = filtered.filter(
+        (med) => String(med.drug) === this.selectedDrug
+      );
     }
     this.medicines = filtered;
   }
@@ -126,11 +132,14 @@ export class MedicinesComponent implements OnInit {
     this.applyFilters();
   }
 
-  getDrugText(drug: number): string {
-    switch (drug) {
-      case 0:  return 'مستحضرات تجميل';
-      case 1:  return 'دواء';
-      default: return 'غير محدد';
+  getDrugText(Drug: number): string {
+    switch (Drug) {
+      case 0:
+        return 'مستحضرات تجميل';
+      case 1:
+        return 'دواء';
+      default:
+        return 'غير محدد';
     }
   }
 
@@ -139,8 +148,10 @@ export class MedicinesComponent implements OnInit {
       alert('عذراً، المستودع غير موثوق. لا يمكن حذف الأدوية.');
       return;
     }
-    
-    this.medicineToDelete = this.medicines.find(m => m.medicineId === medicineId);
+
+    this.medicineToDelete = this.medicines.find(
+      (m) => m.medicineId === medicineId
+    );
     this.medicineIdToDelete = medicineId;
     this.showConfirmModal = true;
   }
@@ -154,7 +165,7 @@ export class MedicinesComponent implements OnInit {
 
   deleteMedicineConfirmed() {
     if (!this.medicineIdToDelete) return;
-    
+
     this.deleting = true;
     this.deleteMedicine(this.medicineIdToDelete);
   }
@@ -166,26 +177,35 @@ export class MedicinesComponent implements OnInit {
       this.closeDeleteModal();
       return;
     }
-    
-    this.http.delete(`https://localhost:7250/api/WarehouseMedicine/DeleteMedicine/${medicineId}?warehouseId=${warehouseId}`).subscribe({
-      next: () => {
-        this.medicines = this.medicines.filter(m => m.medicineId !== medicineId);
-        this.allMedicines = this.allMedicines.filter(m => m.medicineId !== medicineId);
-        this.totalCount--;
-        this.closeDeleteModal();
-        alert('تم حذف الدواء بنجاح.');
-      },
-      error: (err) => {
-        this.deleting = false;
-        alert('حدث خطأ أثناء حذف الدواء.');
-        console.error(err);
-      }
-    });
+
+    this.http
+      .delete(
+        `https://localhost:7250/api/WarehouseMedicine/DeleteMedicine/${medicineId}?warehouseId=${warehouseId}`
+      )
+      .subscribe({
+        next: () => {
+          this.medicines = this.medicines.filter(
+            (m) => m.medicineId !== medicineId
+          );
+          this.allMedicines = this.allMedicines.filter(
+            (m) => m.medicineId !== medicineId
+          );
+          this.totalCount--;
+          this.closeDeleteModal();
+          alert('تم حذف الدواء بنجاح.');
+        },
+        error: (err) => {
+          this.deleting = false;
+          alert('حدث خطأ أثناء حذف الدواء.');
+          console.error(err);
+        },
+      });
   }
 
   getTrustStatusMessage(): string {
     if (this.checkingTrustStatus) return 'جاري التحقق من حالة الثقة...';
-    if (this.isWarehouseTrusted) return 'المستودع موثوق - يمكن تعديل وحذف الأدوية';
+    if (this.isWarehouseTrusted)
+      return 'المستودع موثوق - يمكن تعديل وحذف الأدوية';
     return 'المستودع غير موثوق - لا يمكن تعديل أو حذف الأدوية';
   }
 
@@ -203,106 +223,121 @@ export class MedicinesComponent implements OnInit {
     }
   }
 
-  async onExcelUpload(event: any) {
-    const file: File = event.target.files[0];
-    if (!file) return;
+ async onExcelUpload(event: any) {
+  const file: File = event.target.files[0];
+  if (!file) return;
 
-    this.uploadedFileName = file.name;
-    this.uploading = true;
+  this.uploadedFileName = file.name;
+  this.uploading = true;
 
-    try {
-      const fileData = await this.readFileAsync(file);
-      const workbook = XLSX.read(fileData, { type: 'array' });
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const data = XLSX.utils.sheet_to_json(worksheet);
-      console.log("Parsed Excel first row:", data[0]);
+  try {
+    const fileData = await this.readFileAsync(file);
+    const workbook = XLSX.read(fileData, { type: 'array' });
+    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+    const data = XLSX.utils.sheet_to_json(worksheet);
+    console.log('Parsed Excel first row:', data[0]);
 
+    // Filter only items with IsExist = 1
+    const filteredData = data.filter(
+      (row: any) => Number(row['IsExist']) === 1
+    );
 
-      // Filter only items with IsExist = 1
-      const filteredData = data.filter((row: any) => Number(row["IsExist"]) === 1);
+    // Prepare data for API
+    const medicinesToUpload = filteredData.map((row: any) => ({
+      medicineId: Number(row['ID']),
+      quantity: Number(row['Quantity']),
+      discount: Number(row['Discount']),
+    }));
 
-      // Prepare data for API
-      const medicinesToUpload = filteredData.map((row: any) => ({
-        medicineId: Number(row["ID"]),
-        quantity: Number(row["Quantity"]),
-        discount: Number(row["Discount"])
-      }));
-
-      // Fetch medicine details and prepare for display
-      const mappedMedicines = await Promise.all(
-        filteredData.map(async (row: any) => {
-          try {
-            const response = await fetch(`https://localhost:7250/api/Warehouse/GetMedicine/${row["ID"]}`, {
+    // Fetch medicine details and prepare for display
+    const mappedMedicines = await Promise.all(
+      filteredData.map(async (row: any) => {
+        try {
+          const response = await fetch(
+            `https://localhost:7250/api/Warehouse/GetMedicine/${row['ID']}`,
+            {
               headers: {
-                'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
-                'Content-Type': 'application/json'
-              }
-            });
-
-            if (!response.ok) {
-              throw new Error(`API error for ID ${row["ID"]}`);
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+                'Content-Type': 'application/json',
+              },
             }
+          );
 
-            const medData = await response.json();
-            console.log("Fetched medicine data:", medData);
-
-            return {
-              medicineId: Number(row["ID"]),
-              arabicMedicineName: row["product_name"],
-              englishMedicineName: row["product_name_en"],
-              drug: this.mapDrugValue(row["drug"]),
-              price: medData.price,
-              finalprice: medData.price - (medData.price * Number(row["Discount"])),
-              quantity: Number(row["Quantity"]),
-              discount: Number(row["Discount"]) * 100
-            };
-          } catch (err) {
-            console.error("Failed to fetch price for medicine:", row["ID"], err);
-            return null;
+          if (!response.ok) {
+            throw new Error(`API error for ID ${row['ID']}`);
           }
-        })
-      );
 
-      const validMedicines = mappedMedicines.filter(m => m !== null);
-      
-      // Update local state immediately
-      const existingIds = new Set(this.allMedicines.map(m => m.medicineId));
-      const newMedicines = validMedicines.filter(m => !existingIds.has(m.medicineId));
-      
-      this.allMedicines = [...this.allMedicines, ...newMedicines];
-      this.totalCount += newMedicines.length;
-      this.applyFilters();
+          const medData = await response.json();
+          console.log('Fetched medicine data:', medData);
 
-      // Send update to server
-      const url = `https://localhost:7250/api/Warehouse/UpdateWarehouseMedicines/${this.warehouseId}`;
-      const token = localStorage.getItem('authToken');
+          return {
+            medicineId: Number(row['ID']),
+            arabicMedicineName: row['product_name'],
+            englishMedicineName: row['product_name_en'],
+            Drug: Number(row['Drug']),
+            price: medData.price,
+            finalprice: medData.price - medData.price * Number(row['Discount']),
+            quantity: Number(row['Quantity']),
+            discount: Number(row['Discount']) * 100,
+          };
+        } catch (err) {
+          console.error(
+            'Failed to fetch price for medicine:',
+            row['ID'],
+            err
+          );
+          return null;
+        }
+      })
+    );
 
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(medicinesToUpload)
-      });
+    const validMedicines = mappedMedicines.filter((m) => m !== null);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Server returned ${response.status}: ${errorText}`);
-      }
+    // Update local state immediately
+    const existingIds = new Set(this.allMedicines.map((m) => m.medicineId));
+    const newMedicines = validMedicines.filter(
+      (m) => !existingIds.has(m.medicineId)
+    );
 
-      alert('✅ تم رفع وتحديث الأدوية بنجاح');
-      
-      // Refresh data from server to ensure consistency
-      this.fetchMedicines();
-      
-    } catch (error) {
-      console.error('Error processing Excel file:', error);
-      alert('❌ حدث خطأ أثناء معالجة ملف Excel: ' + (error instanceof Error ? error.message : 'Unknown error'));
-    } finally {
-      this.uploading = false;
+    this.allMedicines = [...this.allMedicines, ...newMedicines];
+    this.totalCount += newMedicines.length;
+    this.applyFilters();
+
+    // Send update to server
+    const url = `https://localhost:7250/api/Warehouse/UpdateWarehouseMedicines/${this.warehouseId}`;
+    const token = localStorage.getItem('authToken');
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(medicinesToUpload),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Server returned ${response.status}: ${errorText}`);
+    }
+
+    alert('✅ تم رفع وتحديث الأدوية بنجاح');
+
+    // Refresh data from server to ensure consistency
+    this.fetchMedicines();
+  } catch (error) {
+    console.error('Error processing Excel file:', error);
+    alert(
+      'هذا الملف موجود بالفعل ولم يحدث عليه أي تغييرات، من فضلك قم برفع ملف جديد ..'
+    );
+  } finally {
+    this.uploading = false;
+    if (event.target) {
+      event.target.value = '';
     }
   }
+}
+
 
   private readFileAsync(file: File): Promise<any> {
     return new Promise((resolve, reject) => {
@@ -314,19 +349,18 @@ export class MedicinesComponent implements OnInit {
   }
 
   private mapDrugValue(value: any): number {
-  if (!value) return -1;
+    if (!value) return -1;
 
-  const strVal = String(value).trim();
+    const strVal = String(value).trim();
 
-  if (strVal === "1") return 1;
-  if (strVal === "0") return 0;
+    if (strVal === '1') return 1;
+    if (strVal === '0') return 0;
 
-  if (strVal === "دواء" || strVal.toLowerCase() === "medicine") return 1;
-  if (strVal === "مستحضرات تجميل" || strVal.toLowerCase() === "cosmetic") return 0;
+    if (strVal === 'دواء' || strVal.toLowerCase() === 'medicine') return 1;
+    if (strVal === 'مستحضرات تجميل' || strVal.toLowerCase() === 'cosmetic')
+      return 0;
 
-  console.warn("⚠️ Drug value غير معروف:", strVal);
-  return -1; 
-}
-
-
+    console.warn('⚠️ Drug value غير معروف:', strVal);
+    return -1;
+  }
 }
