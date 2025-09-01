@@ -108,7 +108,7 @@ export class MedicinesComponent implements OnInit {
         (med) => String(med.drug) === this.selectedDrug
       );
     }
-    // order by englishMedicineName
+    // order by arabicMedicineName
     filtered.sort((a, b) =>
     (a.englishMedicineName || '').localeCompare(b.englishMedicineName || '')
   );
@@ -225,130 +225,149 @@ export class MedicinesComponent implements OnInit {
     }
   }
 
- async onExcelUpload(event: any) {
-  const file: File = event.target.files[0];
-  if (!file) return;
+  async onExcelUpload(event: any) {
+    const file: File = event.target.files[0];
+    if (!file) return;
 
-  this.uploadedFileName = file.name;
-  this.uploading = true;
+    this.uploadedFileName = file.name;
+    this.uploading = true;
 
-  try {
-    const fileData = await this.readFileAsync(file);
-    const workbook = XLSX.read(fileData, { type: 'array' });
-    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-    const data = XLSX.utils.sheet_to_json(worksheet);
-    // console.log('Parsed Excel first row:', data[0]);
+    try {
+      const fileData = await this.readFileAsync(file);
+      const workbook = XLSX.read(fileData, { type: 'array' });
+      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+      const data = XLSX.utils.sheet_to_json(worksheet);
+      // console.log('Parsed Excel first row:', data[0]);
 
-    // Filter only items with IsExist = 1
-    const filteredData = data.filter(
-      (row: any) => Number(row['IsExist']) === 1
-    );
-
-    // Prepare data for API
-    const medicinesToUpload = filteredData.map((row: any) => ({
-      medicineId: Number(row['ID']),
-      quantity: Number(row['Quantity']),
-      discount: Number(row['Discount']),
-    }));
-
-    // Fetch medicine details and prepare for display
-    const mappedMedicines = await Promise.all(
-      filteredData.map(async (row: any) => {
-        try {
-          const response = await fetch(
-            `https://localhost:7250/api/Warehouse/GetMedicine/${row['ID']}`,
-            {
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-                'Content-Type': 'application/json',
-              },
-            }
-          );
-
-          if (!response.ok) {
-            throw new Error(`API error for ID ${row['ID']}`);
-          }
-
-          const medData = await response.json();
-          // console.log('Fetched medicine data:', medData);
-
-          return {
-            medicineId: Number(row['ID']),
-            arabicMedicineName: row['product_name'],
-            englishMedicineName: row['product_name_en'],
-            Drug: Number(row['Drug']),
-            price: medData.price,
-            finalprice: medData.price - medData.price * Number(row['Discount']),
-            quantity: Number(row['Quantity']),
-            discount: Number(row['Discount']) * 100,
-          };
-        } catch (err) {
-          return null;
-        }
-      })
-    );
-
-    const validMedicines = mappedMedicines.filter((m) => m !== null);
-
-    // ✅ Check if there are changes before sending to server
-    const changesExist = this.hasChanges(validMedicines, this.allMedicines);
-
-    if (!changesExist) {
-      alert('⚠️ الملف مرفوع بالفعل ولا يحتوي على أي تغييرات.');
-      this.uploading = false;
-      if (event.target) event.target.value = '';
-      return;
-    }
-
-    // Update local state (merge updates)
-    validMedicines.forEach((newMed) => {
-      const index = this.allMedicines.findIndex(
-        (m) => m.medicineId === newMed.medicineId
+      // Filter only items with IsExist = 1
+      const filteredData = data.filter(
+        (row: any) => Number(row['IsExist']) === 1
       );
-      if (index !== -1) {
-        this.allMedicines[index] = { ...this.allMedicines[index], ...newMed };
-      } else {
-        this.allMedicines.push(newMed);
-        this.totalCount++;
+
+       // ✅ check duplicate IDs inside Excel file
+      const ids = filteredData.map((r: any) => Number(r['ID']));
+      const duplicateIds = ids.filter((id, i) => ids.indexOf(id) !== i);
+      if (duplicateIds.length > 0) {
+        alert(` يوجد IDs مكررة داخل الملف: ${[...new Set(duplicateIds)].join('. ')}⚠️⚠️`);
+        this.uploading = false;
+        if (event.target) event.target.value = '';
+        return;
       }
-    });
-    this.applyFilters();
 
-    // Send update to server
-    const url = `https://localhost:7250/api/Warehouse/UpdateWarehouseMedicines/${this.warehouseId}`;
-    const token = localStorage.getItem('authToken');
+      // Prepare data for API
+      const medicinesToUpload = filteredData.map((row: any) => ({
+        medicineId: Number(row['ID']),
+        quantity: Number(row['Quantity']),
+        discount: Number(row['Discount']),
+      }));
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(medicinesToUpload),
-    });
+      // Fetch medicine details and prepare for display
+      const mappedMedicines = await Promise.all(
+        filteredData.map(async (row: any) => {
+          try {
+            const response = await fetch(
+              `https://localhost:7250/api/Warehouse/GetMedicine/${row['ID']}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+                  'Content-Type': 'application/json',
+                },
+              }
+            );
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.warn(`Server returned ${response.status}: ${errorText}`);
-      alert('الملف مرفوع بالفعل بدون تغييرات. تم قبول الرفع مرة أخرى.⚠️⚠️');
-    }
+            if (!response.ok) {
+              throw new Error(`API error for ID ${row['ID']}`);
+            }
 
-    alert('تم رفع وتحديث الأدوية بنجاح .✅✅');
+            const medData = await response.json();
+            // console.log('Fetched medicine data:', medData);
 
-    // Refresh data from server to ensure consistency
-    this.fetchMedicines();
-  } catch (error) {
-    // console.error('Error processing Excel file:', error);
-      alert('حدث خطأ أثناء معالجة الملف. حاول مرة أخرى.');
+             // ✅ check if Drug matches DB value
+            if (Number(row['Drug']) !== medData.drug) {
+              alert(` الدواء ID ${row['ID']} له قيمة Drug مختلفة عن قاعدة البيانات (ملف: ${row['Drug']} - DB: ${medData.drug})⚠️⚠️`);
+            }
 
-  } finally {
-    this.uploading = false;
-    if (event.target) {
-      event.target.value = '';
+            // ✅ check if ID already exists in this.allMedicines
+            if (this.allMedicines.some(m => m.medicineId === Number(row['ID']))) {
+              alert(` الدواء ID ${row['ID']} موجود بالفعل في المستودع.⚠️⚠️`);
+            }
+
+            return {
+              medicineId: Number(row['ID']),
+              arabicMedicineName: row['product_name'],
+              englishMedicineName: row['product_name_en'],
+              Drug: Number(row['Drug']),
+              price: medData.price,
+              finalprice: medData.price - medData.price * Number(row['Discount']),
+              quantity: Number(row['Quantity']),
+              discount: Number(row['Discount']) * 100,
+            };
+          } catch (err) {
+            return null;
+          }
+        })
+      );
+
+      const validMedicines = mappedMedicines.filter((m) => m !== null);
+
+      // ✅ Check if there are changes before sending to server
+      const changesExist = this.hasChanges(validMedicines, this.allMedicines);
+
+      if (!changesExist) {
+        alert(' الملف مرفوع بالفعل ولا يحتوي على أي تغييرات.⚠️⚠️');
+        this.uploading = false;
+        if (event.target) event.target.value = '';
+        return;
+      }
+
+      // Update local state (merge updates)
+      validMedicines.forEach((newMed) => {
+        const index = this.allMedicines.findIndex(
+          (m) => m.medicineId === newMed.medicineId
+        );
+        if (index !== -1) {
+          this.allMedicines[index] = { ...this.allMedicines[index], ...newMed };
+        } else {
+          this.allMedicines.push(newMed);
+          this.totalCount++;
+        }
+      });
+      this.applyFilters();
+
+      // Send update to server
+      const url = `https://localhost:7250/api/Warehouse/UpdateWarehouseMedicines/${this.warehouseId}`;
+      const token = localStorage.getItem('authToken');
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(medicinesToUpload),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.warn(`Server returned ${response.status}: ${errorText}`);
+        alert('هذا الملف تم رفعه من قبل بدون أي تغييرات، تم قبول إعادة الرفع مرة أخري. ⚠⚠');
+      }
+
+      alert('تم رفع وتحديث الأدوية بنجاح .✅✅');
+
+      // Refresh data from server to ensure consistency
+      this.fetchMedicines();
+    } catch (error) {
+      // console.error('Error processing Excel file:', error);
+        alert('حدث خطأ أثناء معالجة الملف. حاول مرة أخرى.');
+
+    } finally {
+      this.uploading = false;
+      if (event.target) {
+        event.target.value = '';
+      }
     }
   }
-}
-
 
   private readFileAsync(file: File): Promise<any> 
   {

@@ -154,7 +154,7 @@ export class MedicineEditFormComponent implements OnInit {
       { responseType: 'text' }
     ).subscribe({
       next: (res) => {
-        alert('تم تحديث الدواء بنجاح.');
+        alert('تم تحديث الدواء بنجاح.✅✅');
         this.router.navigate(['/dashboard/medicines']);
       },
       error: (err) => {
