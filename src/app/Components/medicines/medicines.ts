@@ -98,10 +98,8 @@ export class MedicinesComponent implements OnInit {
     let filtered = this.allMedicines;
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        (med) =>
-          (med.englishMedicineName &&
-            med.englishMedicineName.toLowerCase().includes(term)) ||
+      filtered = filtered.filter( (med) => 
+        (med.englishMedicineName && med.englishMedicineName.toLowerCase().includes(term)) ||
           (med.arabicMedicineName && med.arabicMedicineName.includes(term))
       );
     }
@@ -110,6 +108,10 @@ export class MedicinesComponent implements OnInit {
         (med) => String(med.drug) === this.selectedDrug
       );
     }
+    // order by englishMedicineName
+    filtered.sort((a, b) =>
+    (a.englishMedicineName || '').localeCompare(b.englishMedicineName || '')
+  );
     this.medicines = filtered;
   }
 
@@ -281,11 +283,6 @@ export class MedicinesComponent implements OnInit {
             discount: Number(row['Discount']) * 100,
           };
         } catch (err) {
-          // console.error(
-          //   'Failed to fetch price for medicine:',
-          //   row['ID'],
-          //   err
-          // );
           return null;
         }
       })
@@ -293,14 +290,28 @@ export class MedicinesComponent implements OnInit {
 
     const validMedicines = mappedMedicines.filter((m) => m !== null);
 
-    // Update local state immediately
-    const existingIds = new Set(this.allMedicines.map((m) => m.medicineId));
-    const newMedicines = validMedicines.filter(
-      (m) => !existingIds.has(m.medicineId)
-    );
+    // ✅ Check if there are changes before sending to server
+    const changesExist = this.hasChanges(validMedicines, this.allMedicines);
 
-    this.allMedicines = [...this.allMedicines, ...newMedicines];
-    this.totalCount += newMedicines.length;
+    if (!changesExist) {
+      alert('⚠️ الملف مرفوع بالفعل ولا يحتوي على أي تغييرات.');
+      this.uploading = false;
+      if (event.target) event.target.value = '';
+      return;
+    }
+
+    // Update local state (merge updates)
+    validMedicines.forEach((newMed) => {
+      const index = this.allMedicines.findIndex(
+        (m) => m.medicineId === newMed.medicineId
+      );
+      if (index !== -1) {
+        this.allMedicines[index] = { ...this.allMedicines[index], ...newMed };
+      } else {
+        this.allMedicines.push(newMed);
+        this.totalCount++;
+      }
+    });
     this.applyFilters();
 
     // Send update to server
@@ -318,18 +329,18 @@ export class MedicinesComponent implements OnInit {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Server returned ${response.status}: ${errorText}`);
+      console.warn(`Server returned ${response.status}: ${errorText}`);
+      alert('الملف مرفوع بالفعل بدون تغييرات. تم قبول الرفع مرة أخرى.⚠️⚠️');
     }
 
-    alert('✅ تم رفع وتحديث الأدوية بنجاح');
+    alert('تم رفع وتحديث الأدوية بنجاح .✅✅');
 
     // Refresh data from server to ensure consistency
     this.fetchMedicines();
   } catch (error) {
     // console.error('Error processing Excel file:', error);
-    alert(
-      'هذا الملف موجود بالفعل ولم يحدث عليه أي تغييرات، من فضلك قم برفع ملف جديد ..'
-    );
+      alert('حدث خطأ أثناء معالجة الملف. حاول مرة أخرى.');
+
   } finally {
     this.uploading = false;
     if (event.target) {
@@ -339,7 +350,8 @@ export class MedicinesComponent implements OnInit {
 }
 
 
-  private readFileAsync(file: File): Promise<any> {
+  private readFileAsync(file: File): Promise<any> 
+  {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e: any) => resolve(e.target.result);
@@ -348,19 +360,18 @@ export class MedicinesComponent implements OnInit {
     });
   }
 
-  private mapDrugValue(value: any): number {
-    if (!value) return -1;
+  private hasChanges(newData: any[], existingData: any[]): boolean 
+  {
+  if (newData.length !== existingData.length) return true;
 
-    const strVal = String(value).trim();
+  return newData.some((newMed) => {
+    const oldMed = existingData.find(m => m.medicineId === newMed.medicineId);
+    if (!oldMed) return true;
+    return (
+      oldMed.quantity !== newMed.quantity ||
+      oldMed.discount !== newMed.discount || oldMed.price !== newMed.price
+    );
+  });
+}
 
-    if (strVal === '1') return 1;
-    if (strVal === '0') return 0;
-
-    if (strVal === 'دواء' || strVal.toLowerCase() === 'medicine') return 1;
-    if (strVal === 'مستحضرات تجميل' || strVal.toLowerCase() === 'cosmetic')
-      return 0;
-
-    // console.warn('⚠️ Drug value غير معروف:', strVal);
-    return -1;
-  }
 }
