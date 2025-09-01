@@ -6,6 +6,7 @@ It allows warehouses, pharmacies, and admins to manage medicines, orders, and sy
 ## 🚀 Features  
 
 ### 🔹 Warehouse  
+- ✅ Upload Excel sheets to add or update medicines, with error handling for invalid or missing data.
 - ✅ Update order status (e.g., pending → shipped → delivered).  
 - ✅ View and manage all orders.  
 - ✅ Update profile status.  
