@@ -314,7 +314,7 @@ export class MedicinesComponent implements OnInit {
       const changesExist = this.hasChanges(validMedicines, this.allMedicines);
 
       if (!changesExist) {
-        alert(' الملف مرفوع بالفعل ولا يحتوي على أي تغييرات.⚠️⚠️');
+        alert(' ملحوظةالملف مرفوع بالفعل ولا يحتوي على أي تغييرات.⚠️⚠️');
         this.uploading = false;
         if (event.target) event.target.value = '';
         return;
@@ -350,7 +350,7 @@ export class MedicinesComponent implements OnInit {
       if (!response.ok) {
         const errorText = await response.text();
         console.warn(`Server returned ${response.status}: ${errorText}`);
-        alert('هذا الملف تم رفعه من قبل بدون أي تغييرات، تم قبول إعادة الرفع مرة أخري. ⚠⚠');
+        alert('ملحوظة: هذا الملف تم رفعه من قبل بدون أي تغييرات، تم قبول إعادة الرفع مرة أخري. ⚠⚠');
       }
 
       alert('تم رفع وتحديث الأدوية بنجاح .✅✅');

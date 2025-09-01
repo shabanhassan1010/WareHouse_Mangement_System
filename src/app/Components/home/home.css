@@ -132,6 +132,20 @@ body {
   border-color: var(--warning-color);
 }
 
+.btn-info-dark {
+  background-color: #046b8a !important; /* أغمق من var(--info-color) */
+  border-color: #035a72 !important;
+  color: #fff !important;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.btn-info-dark:hover {
+  background-color: #035a72 !important;
+  border-color: #024659 !important;
+}
+
+
 /* Badge styling */
 .badge.bg-success {
   background-color: var(--success-color) !important;
