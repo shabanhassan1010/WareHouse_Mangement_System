@@ -45,7 +45,7 @@ export class MedicinesComponent implements OnInit {
     const warehouseData = JSON.parse(
       localStorage.getItem('warehouseData') || '{}'
     );
-    this.warehouseId = warehouseData?.id ;
+    this.warehouseId = warehouseData?.id;
     this.checkWarehouseTrustStatus();
   }
 
@@ -98,8 +98,10 @@ export class MedicinesComponent implements OnInit {
     let filtered = this.allMedicines;
     if (this.searchTerm) {
       const term = this.searchTerm.toLowerCase();
-      filtered = filtered.filter( (med) => 
-        (med.englishMedicineName && med.englishMedicineName.toLowerCase().includes(term)) ||
+      filtered = filtered.filter(
+        (med) =>
+          (med.englishMedicineName &&
+            med.englishMedicineName.toLowerCase().includes(term)) ||
           (med.arabicMedicineName && med.arabicMedicineName.includes(term))
       );
     }
@@ -110,8 +112,8 @@ export class MedicinesComponent implements OnInit {
     }
     // order by arabicMedicineName
     filtered.sort((a, b) =>
-    (a.englishMedicineName || '').localeCompare(b.englishMedicineName || '')
-  );
+      (a.englishMedicineName || '').localeCompare(b.englishMedicineName || '')
+    );
     this.medicines = filtered;
   }
 
@@ -194,7 +196,7 @@ export class MedicinesComponent implements OnInit {
           );
           this.totalCount--;
           this.closeDeleteModal();
-          alert('تم حذف الدواء بنجاح.');
+          alert('تم حذف الدواء بنجاح.✅✅');
         },
         error: (err) => {
           this.deleting = false;
@@ -244,11 +246,15 @@ export class MedicinesComponent implements OnInit {
         (row: any) => Number(row['IsExist']) === 1
       );
 
-       // ✅ check duplicate IDs inside Excel file
+      // ✅ check duplicate IDs inside Excel file
       const ids = filteredData.map((r: any) => Number(r['ID']));
       const duplicateIds = ids.filter((id, i) => ids.indexOf(id) !== i);
       if (duplicateIds.length > 0) {
-        alert(` يوجد IDs مكررة داخل الملف: ${[...new Set(duplicateIds)].join('. ')}⚠️⚠️`);
+        alert(
+          ` يوجد IDs مكررة داخل الملف: ${[...new Set(duplicateIds)].join(
+            '. '
+          )}⚠️⚠️`
+        );
         this.uploading = false;
         if (event.target) event.target.value = '';
         return;
@@ -282,13 +288,17 @@ export class MedicinesComponent implements OnInit {
             const medData = await response.json();
             // console.log('Fetched medicine data:', medData);
 
-             // ✅ check if Drug matches DB value
+            // ✅ check if Drug matches DB value
             if (Number(row['Drug']) !== medData.drug) {
-              alert(` الدواء ID ${row['ID']} له قيمة Drug مختلفة عن قاعدة البيانات (ملف: ${row['Drug']} - DB: ${medData.drug})⚠️⚠️`);
+              alert(
+                ` الدواء ID ${row['ID']} له قيمة Drug مختلفة عن قاعدة البيانات (ملف: ${row['Drug']} - DB: ${medData.drug})⚠️⚠️`
+              );
             }
 
             // ✅ check if ID already exists in this.allMedicines
-            if (this.allMedicines.some(m => m.medicineId === Number(row['ID']))) {
+            if (
+              this.allMedicines.some((m) => m.medicineId === Number(row['ID']))
+            ) {
               alert(` الدواء ID ${row['ID']} موجود بالفعل في المستودع.⚠️⚠️`);
             }
 
@@ -298,7 +308,8 @@ export class MedicinesComponent implements OnInit {
               englishMedicineName: row['product_name_en'],
               Drug: Number(row['Drug']),
               price: medData.price,
-              finalprice: medData.price - medData.price * Number(row['Discount']),
+              finalprice:
+                medData.price - medData.price * Number(row['Discount']),
               quantity: Number(row['Quantity']),
               discount: Number(row['Discount']) * 100,
             };
@@ -350,7 +361,9 @@ export class MedicinesComponent implements OnInit {
       if (!response.ok) {
         const errorText = await response.text();
         console.warn(`Server returned ${response.status}: ${errorText}`);
-        alert('ملحوظة: هذا الملف تم رفعه من قبل بدون أي تغييرات، تم قبول إعادة الرفع مرة أخري. ⚠⚠');
+        alert(
+          'ملحوظة: هذا الملف تم رفعه من قبل بدون أي تغييرات، تم قبول إعادة الرفع مرة أخري. ⚠⚠'
+        );
       }
 
       alert('تم رفع وتحديث الأدوية بنجاح .✅✅');
@@ -359,8 +372,7 @@ export class MedicinesComponent implements OnInit {
       this.fetchMedicines();
     } catch (error) {
       // console.error('Error processing Excel file:', error);
-        alert('حدث خطأ أثناء معالجة الملف. حاول مرة أخرى.');
-
+      alert('حدث خطأ أثناء معالجة الملف. حاول مرة أخرى.');
     } finally {
       this.uploading = false;
       if (event.target) {
@@ -369,8 +381,7 @@ export class MedicinesComponent implements OnInit {
     }
   }
 
-  private readFileAsync(file: File): Promise<any> 
-  {
+  private readFileAsync(file: File): Promise<any> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e: any) => resolve(e.target.result);
@@ -379,18 +390,19 @@ export class MedicinesComponent implements OnInit {
     });
   }
 
-  private hasChanges(newData: any[], existingData: any[]): boolean 
-  {
-  if (newData.length !== existingData.length) return true;
+  private hasChanges(newData: any[], existingData: any[]): boolean {
+    if (newData.length !== existingData.length) return true;
 
-  return newData.some((newMed) => {
-    const oldMed = existingData.find(m => m.medicineId === newMed.medicineId);
-    if (!oldMed) return true;
-    return (
-      oldMed.quantity !== newMed.quantity ||
-      oldMed.discount !== newMed.discount || oldMed.price !== newMed.price
-    );
-  });
-}
-
+    return newData.some((newMed) => {
+      const oldMed = existingData.find(
+        (m) => m.medicineId === newMed.medicineId
+      );
+      if (!oldMed) return true;
+      return (
+        oldMed.quantity !== newMed.quantity ||
+        oldMed.discount !== newMed.discount ||
+        oldMed.price !== newMed.price
+      );
+    });
+  }
 }
