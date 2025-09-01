@@ -1,6 +1,7 @@
 # 📦 Pharmacy System  
 
-This project is a **Pharmacy Management Web Application** built with **Angular 20** and **ASP.NET Core (Clean Architecture)**. It allows warehouses, pharmacies, and admins to manage medicines, orders, and system activities.  
+This project is a **Pharmacy Management Web Application** built with **Angular 20** and **ASP.NET Core (Clean Architecture)**.
+It allows warehouses, pharmacies, and admins to manage medicines, orders, and system activities.  
 
 ## 🚀 Features  
 
