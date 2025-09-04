@@ -95,7 +95,7 @@ export class OrderDetails implements OnInit {
         warehouseId = warehouse.id ;
     }
 
-    fetch(`https://localhost:7250/api/Order/warehouse/${warehouseId}`, {
+    fetch(`http://www.PharmaAtOncePreDeploy.somee.com/api/Order/warehouse/${warehouseId}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
@@ -204,7 +204,7 @@ export class OrderDetails implements OnInit {
     const token = localStorage.getItem('authToken');
     const statusEnumValue = this.getStatusEnumValue(newStatus);
     
-    fetch(`https://localhost:7250/api/Order/update-status/${this.order.orderId}?newStatus=${statusEnumValue}`, {
+    fetch(`http://www.PharmaAtOncePreDeploy.somee.com/api/Order/update-status/${this.order.orderId}?newStatus=${statusEnumValue}`, {
       method: 'PUT',
       headers: {
         'Authorization': `Bearer ${token}`,

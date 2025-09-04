@@ -36,7 +36,7 @@ export class LoginComponent {
     // console.log('Attempting login with:', { email, password });
 
     // Use proxy configuration to avoid CORS issues
-    fetch('/api/Warehouse/login', {
+    fetch('http://www.PharmaAtOncePreDeploy.somee.com/api/Warehouse/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

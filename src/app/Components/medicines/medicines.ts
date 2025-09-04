@@ -52,7 +52,7 @@ export class MedicinesComponent implements OnInit {
   checkWarehouseTrustStatus() {
     // console.log('Checking trust status for warehouse:', this.warehouseId);
 
-    fetch(`https://localhost:7250/api/Warehouse/Getbyid/${this.warehouseId}`, {
+    fetch(`http://www.PharmaAtOncePreDeploy.somee.com/api/Warehouse/Getbyid/${this.warehouseId}`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('authToken')}`,
         'Content-Type': 'application/json',
@@ -80,7 +80,7 @@ export class MedicinesComponent implements OnInit {
   }
 
   fetchMedicines() {
-    const url = `http://localhost:4200/api/Warehouse/GetWarehousMedicines/${this.warehouseId}/medicines?page=${this.currentPage}&pageSize=${this.pageSize}`;
+    const url = `http://www.PharmaAtOncePreDeploy.somee.com/api/Warehouse/GetWarehousMedicines/${this.warehouseId}/medicines?page=${this.currentPage}&pageSize=${this.pageSize}`;
     fetch(url)
       .then((res) => res.json())
       .then((data) => {
@@ -184,7 +184,7 @@ export class MedicinesComponent implements OnInit {
 
     this.http
       .delete(
-        `https://localhost:7250/api/WarehouseMedicine/DeleteMedicine/${medicineId}?warehouseId=${warehouseId}`
+        `http://www.PharmaAtOncePreDeploy.somee.com/api/WarehouseMedicine/DeleteMedicine/${medicineId}?warehouseId=${warehouseId}`
       )
       .subscribe({
         next: () => {
@@ -272,7 +272,7 @@ export class MedicinesComponent implements OnInit {
         filteredData.map(async (row: any) => {
           try {
             const response = await fetch(
-              `https://localhost:7250/api/Warehouse/GetMedicine/${row['ID']}`,
+              `http://www.PharmaAtOncePreDeploy.somee.com/api/Warehouse/GetMedicine/${row['ID']}`,
               {
                 headers: {
                   Authorization: `Bearer ${localStorage.getItem('authToken')}`,
@@ -346,7 +346,7 @@ export class MedicinesComponent implements OnInit {
       this.applyFilters();
 
       // Send update to server
-      const url = `https://localhost:7250/api/Warehouse/UpdateWarehouseMedicines/${this.warehouseId}`;
+      const url = `http://www.PharmaAtOncePreDeploy.somee.com/api/Warehouse/UpdateWarehouseMedicines/${this.warehouseId}`;
       const token = localStorage.getItem('authToken');
 
       const response = await fetch(url, {

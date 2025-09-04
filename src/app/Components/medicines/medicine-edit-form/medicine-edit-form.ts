@@ -58,7 +58,7 @@ export class MedicineEditFormComponent implements OnInit {
     
     // console.log('Checking trust status for warehouse:', warehouseId);
     
-    fetch(`https://localhost:7250/api/Warehouse/Getbyid/${warehouseId}`, {
+    fetch(`http://www.PharmaAtOncePreDeploy.somee.com/api/Warehouse/Getbyid/${warehouseId}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
         'Content-Type': 'application/json'
@@ -97,7 +97,7 @@ export class MedicineEditFormComponent implements OnInit {
   }
 
   fetchMedicine() {
-    this.http.get<any>(`https://localhost:7250/api/WarehouseMedicine/GetMedicineById?medicineId=${this.medicineId}&warehouseId=${this.warehouseId}`)
+    this.http.get<any>(`http://www.PharmaAtOncePreDeploy.somee.com/api/WarehouseMedicine/GetMedicineById?medicineId=${this.medicineId}&warehouseId=${this.warehouseId}`)
       .subscribe({
         next: (data) => {
           // console.log('API Response:', data);
@@ -149,7 +149,7 @@ export class MedicineEditFormComponent implements OnInit {
     // console.log('Submitting medicine update:', formData);
 
     this.http.put(
-      `https://localhost:7250/api/WarehouseMedicine/UpdateMedicine/${this.medicineId}?warehouseId=${this.warehouseId}`,
+      `http://www.PharmaAtOncePreDeploy.somee.com/api/WarehouseMedicine/UpdateMedicine/${this.medicineId}?warehouseId=${this.warehouseId}`,
       formData,
       { responseType: 'text' }
     ).subscribe({
