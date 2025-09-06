@@ -1,7 +1,33 @@
 import { Component, OnInit } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
+import { Observable } from 'rxjs';   // ✅ add this
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import { HttpClient, HttpParams } from '@angular/common/http';
+
 import { CommonModule } from '@angular/common';
 import { OrderService } from '../../Core/Services/order-service';
+
+
+export interface InvoiceItem {
+  medicineName: string;
+  arabicMedicineName: string;
+  medicineImage: string;
+  medicinePrice: number;
+  quantity: number;
+  totalPriceBeforeDisccount: number;
+  totalPriceAfterDisccount: number;
+  discountAmount: number;
+  discountPercentage: number;
+  pharmacyName: string;
+  wareHouseName: string;
+}
+
+export interface InvoiceResponse {
+  message: string;
+  result: InvoiceItem[];
+}
+
 
 interface Order {
   orderId: number;
@@ -41,14 +67,146 @@ export class OrderDetails implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router ,
-    private orderService : OrderService
+    private orderService : OrderService,
+    private http: HttpClient
   ) {}
+
+
+
+  getOrderDetailsForAdminDashboard(orderId: number): Observable<InvoiceResponse> {
+    return this.http.get<InvoiceResponse>(
+      `/api/Order/getAllOrderDetailsForAdminDashboard/${orderId}`
+    );
+  }
+
+  invoiceData: InvoiceItem[] = [];
+  invoiceOrderId?: number;
+  
+  loadOrderDetailsForInvoice(orderId: number): void {
+    this.getOrderDetailsForAdminDashboard(orderId).subscribe({
+      next: (res) => {
+        this.invoiceData = res.result;
+        this.invoiceOrderId = orderId;
+      },
+      error: (err) => {
+        console.error('Error fetching invoice data:', err);
+      }
+    });
+  }
+  printOrderPdf(): void {
+
+    if (!this.invoiceData || this.invoiceData.length === 0) return;
+  
+    const doc = new jsPDF();
+  
+    this.fetchFontAsBase64('assets/fonts/Amiri-Regular.ttf').then((base64) => {
+      (doc as any).addFileToVFS('Amiri-Regular.ttf', base64);
+      (doc as any).addFont('Amiri-Regular.ttf', 'Amiri', 'normal');
+      doc.setFont('Amiri');
+  
+      const img = new Image();
+      img.src = 'assets/img/logo.jpg';
+      img.onload = () => {
+        doc.addImage(img, 'JPG', 160, 10, 40, 30);
+        addContent();
+      };
+  
+      const addContent = () => {
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const orderInfo = this.invoiceData[0]; // ✅ take header info from first item
+  
+        // Header
+        doc.setFontSize(18);
+        doc.text('Pharma At Once', 105, 30, { align: 'center' });
+        doc.text('فاتورة بيع', 105, 50, { align: 'center' });
+  
+        // Customer / Order info
+        doc.setFontSize(12);
+        doc.text(`رقم الطلب: ${this.invoiceOrderId}`, 200, 70, { align: 'right' });
+        doc.text(`التاريخ: ${this.order?.orderDate}`, 200, 80, { align: 'right' });
+        doc.text(`${orderInfo.wareHouseName} :مخزن`, 200, 90, { align: 'right' });
+        doc.text(`${orderInfo.pharmacyName} :صيدلية`, 200, 100, { align: 'right' });
+        doc.line(10, 105, pageWidth - 10, 105);
+  
+        // Table
+        autoTable(doc, {
+          head: [
+            [
+              'م',
+              'الصنف',
+              'الكمية',
+              'السعر (ج.م)',
+              'الخصم %',
+              'القيمة قبل الخصم',
+              'القيمة بعد الخصم',
+            ].reverse(),
+          ],
+          body: this.invoiceData.map((item, index) =>
+            [
+              index + 1,
+              item.arabicMedicineName,
+              item.quantity,
+              item.medicinePrice.toFixed(2),
+              `${item.discountPercentage.toFixed(2)}%`,
+              item.totalPriceBeforeDisccount.toFixed(2),
+              item.totalPriceAfterDisccount.toFixed(2),
+            ].reverse()
+          ),
+          startY: 110,
+          styles: { halign: 'right', font: 'Amiri', fontStyle: 'normal' },
+          headStyles: { fillColor: [200, 200, 200], halign: 'center' },
+        });
+  
+        // Totals
+        let finalY = (doc as any).lastAutoTable.finalY + 20;
+        const totalBefore = this.invoiceData.reduce(
+          (sum, i) => sum + i.totalPriceBeforeDisccount,
+          0
+        );
+        const discount = this.invoiceData.reduce(
+          (sum, i) => sum + i.discountAmount,
+          0
+        );
+        const totalAfter = this.invoiceData.reduce(
+          (sum, i) => sum + i.totalPriceAfterDisccount,
+          0
+        );
+  
+        doc.text(`الإجمالي قبل الخصم: ${totalBefore.toFixed(2)} ج.م`, 200, finalY, { align: 'right' });
+        finalY += 10;
+        doc.text(`إجمالي الخصم: ${discount.toFixed(2)} ج.م`, 200, finalY, { align: 'right' });
+        finalY += 10;
+        doc.text(`الإجمالي بعد الخصم: ${totalAfter.toFixed(2)} ج.م`, 200, finalY, { align: 'right' });
+  
+        // Save file
+        doc.save(`invoice_order_${this.invoiceOrderId}.pdf`);
+      };
+  
+      img.onerror = () => addContent();
+    });
+  }
+  fetchFontAsBase64(url: string): Promise<string> {
+    return fetch(url)
+      .then((res) => res.arrayBuffer())
+      .then((buffer) => {
+        let binary = '';
+        const bytes = new Uint8Array(buffer);
+        const chunkSize = 0x8000;
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+          const chunk = bytes.subarray(i, i + chunkSize);
+          binary += String.fromCharCode.apply(null, chunk as any);
+        }
+        return btoa(binary);
+      });
+  }
 
   ngOnInit() {
     this.route.params.subscribe(params => {
       this.orderId = +params['id'];
       if (this.orderId) {
         this.loadOrderDetails();
+       this.loadOrderDetailsForInvoice(this.orderId);
+
       } else {
         this.error = 'رقم الطلب غير صحيح';
       }

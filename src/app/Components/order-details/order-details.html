@@ -11,6 +11,8 @@
               <div>
                 <h3 class="fw-bold text-dark mb-1">تفاصيل الطلب رقم {{ orderId }}</h3>
                 <p class="text-muted mb-0">معلومات الطلب والأدوية المطلوبة</p>
+    
+              
               </div>
 
             </div>
@@ -19,6 +21,7 @@
               العودة للوحة التحكم
             </button>
           </div>
+          
         </div>
         
         <div class="card-body p-4">
@@ -106,6 +109,7 @@
                       <i class="fas fa-chart-pie me-2"></i>
                       ملخص الطلب
                     </h5>
+ 
                     <div class="row text-center">
                       <div class="col-6">
                         <div class="p-3">
@@ -144,7 +148,7 @@
                         <th>رقم الدواء</th>
                         <th>اسم الدواء</th>
                         <th>الكمية</th>
-                        <th>السعر بعد الخصم</th>
+                        <th>السعر الوحدة بعد الخصم</th>
                         <th>إجمالي السعر بعد الخصم</th>
                       </tr>
                     </thead>
@@ -297,8 +301,8 @@
                             <th>رقم الدواء</th>
                             <th>اسم الدواء</th>
                             <th>الكمية</th>
-                            <th>السعر الوحدة</th>
-                            <th>المجموع</th>
+                            <th> السعر الوحدة بعد الخصم</th>
+                            <th>المجموع بعد الخصم</th>
                             <th>النسبة المئوية</th>
                             <th>الحالة</th>
                           </tr>
@@ -390,6 +394,13 @@
                 العودة للوحة التحكم
               </button>
               <div>
+
+                <button
+                class="btn btn-primary"
+                *ngIf="invoiceData.length > 0 && (order.status === 'Preparing' || order.status === 'Delivering')"
+                (click)="printOrderPdf()">
+                <i class="la la-print"></i> Print PDF
+              </button>
               <button class="btn btn-warning order-btn me-2" 
                       (click)="updateOrderStatus('Preparing')"
                       [disabled]="updatingStatus || !isStatusChangeAllowed('Preparing')">
