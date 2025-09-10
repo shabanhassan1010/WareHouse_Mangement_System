@@ -168,6 +168,14 @@ export class OrderDetails implements OnInit {
     
     const currentStatus = this.order.status;
     
+    if (this.terminalStatuses.includes(currentStatus)) {
+    return false;
+    }
+
+    if (newStatus === 'Cancelled') {
+      return currentStatus == 'Ordered';
+    }
+
     // Prevent reverting to previous statuses
     const currentIndex = this.statusHierarchy.indexOf(currentStatus);
     const newIndex = this.statusHierarchy.indexOf(newStatus);
@@ -175,16 +183,6 @@ export class OrderDetails implements OnInit {
     if (currentIndex !== -1 && newIndex !== -1) {
       // Only allow moving forward in the hierarchy
       return newIndex > currentIndex;
-    }
-    
-    // the finial status can not go to it
-    if (this.terminalStatuses.includes(currentStatus)) {
-    return false;
-     }
-
-    // Allow terminal status changes at any time
-    if (this.terminalStatuses.includes(newStatus)) {
-      return true;
     }
     
     // Prevent other invalid transitions

@@ -408,7 +408,8 @@
                 <i class="fas fa-check"></i> تم التوصيل
               </button>
 
-              <button class="btn btn-danger order-btn me-2" 
+              <button *ngIf="order?.status === 'Ordered'"
+                      class="btn btn-danger order-btn me-2" 
                       (click)="updateOrderStatus('Cancelled')"
                       [disabled]="updatingStatus">
                 <i class="fas fa-times"></i> إلغاء
