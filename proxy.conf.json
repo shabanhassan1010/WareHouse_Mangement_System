@@ -1,6 +1,6 @@
 {
   "/api": {
-    "target": "https://localhost:7250",
+    "target": "http://pharmaatoncepredeploy.somee.com",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"

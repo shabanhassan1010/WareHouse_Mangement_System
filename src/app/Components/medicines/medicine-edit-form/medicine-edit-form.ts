@@ -28,7 +28,7 @@ export class MedicineEditFormComponent implements OnInit {
     private router: Router
   ) {
     this.medicineForm = this.fb.group({
-      quantity: ['', [Validators.required, Validators.min(0), Validators.max(999999)]],
+      quantity: ['', [Validators.required, Validators.min(0), Validators.max(9999)]],
       discount: ['', [Validators.required, Validators.min(0), Validators.max(100)]],
     });
   }
@@ -56,8 +56,6 @@ export class MedicineEditFormComponent implements OnInit {
     const warehouseData = JSON.parse(localStorage.getItem('warehouseData') || '{}');
     const warehouseId = warehouseData?.id || this.warehouseId || '73';
     
-    // console.log('Checking trust status for warehouse:', warehouseId);
-    
     fetch(`http://www.PharmaAtOncePreDeploy.somee.com/api/Warehouse/Getbyid/${warehouseId}`, {
       headers: {
         'Authorization': `Bearer ${localStorage.getItem('authToken')}`,
@@ -65,13 +63,10 @@ export class MedicineEditFormComponent implements OnInit {
       }
     })
       .then(res => {
-        if (!res.ok) {
-          throw new Error(`فشل في جلب بيانات المستودع: ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`فشل في جلب بيانات المستودع: ${res.status}`);
         return res.json();
       })
       .then(data => {
-        // console.log('Warehouse data for trust check:', data);
         this.isWarehouseTrusted = data.isTrusted || false;
         this.checkingTrustStatus = false;
         
@@ -81,11 +76,9 @@ export class MedicineEditFormComponent implements OnInit {
           return;
         }
         
-        // If trusted, proceed to fetch medicine data
         this.fetchMedicine();
       })
       .catch(err => {
-        // console.error('Error checking warehouse trust status:', err);
         this.error = 'فشل في التحقق من حالة الثقة للمستودع';
         this.checkingTrustStatus = false;
         this.loading = false;
@@ -97,32 +90,25 @@ export class MedicineEditFormComponent implements OnInit {
   }
 
   fetchMedicine() {
-    this.http.get<any>(`http://www.PharmaAtOncePreDeploy.somee.com/api/WarehouseMedicine/GetMedicineById?medicineId=${this.medicineId}&warehouseId=${this.warehouseId}`)
+    this.http.get<any>(
+      `http://www.PharmaAtOncePreDeploy.somee.com/api/WarehouseMedicine/GetMedicineById?medicineId=${this.medicineId}&warehouseId=${this.warehouseId}`
+    )
       .subscribe({
         next: (data) => {
-          // console.log('API Response:', data);
-          
-          // Handle different possible field names for discount
-          let discountValue = data.discount;
-          if (discountValue === undefined || discountValue === null) {
-            discountValue = data.discountPercentage || data.discountPercent || data.discountValue || 0;
-          }
-          
-          // Convert discount to percentage if it's in decimal format (0.15 -> 15)
+          let discountValue = data.discount ?? data.discountPercentage ?? 0;
+
+          // 🟢 لو مخزن كـ decimal (0.12) حوّله لـ 12 للعرض في الفورم
           if (typeof discountValue === 'number' && discountValue <= 1) {
             discountValue = discountValue * 100;
           }
-          
-          // console.log('Processed values:', { quantity: data.quantity,discount: discountValue,originalDiscount: data.discount});
-          
-          // Only patch the fields we want to edit
+
           this.medicineForm.patchValue({
             quantity: data.quantity,
             discount: discountValue
           });
           this.loading = false;
         },
-        error: (err) => {
+        error: () => {
           this.error = 'تعذر تحميل بيانات الدواء. تأكد من صحة المعرف.';
           this.loading = false;
         }
@@ -141,30 +127,37 @@ export class MedicineEditFormComponent implements OnInit {
     }
 
     this.submitting = true;
+
+    const discountRaw = this.medicineForm.get('discount')?.value ?? 0;
+    // 🟢 حوّل الخصم من نسبة مئوية → decimal قبل الإرسال
+    const discountToSend = Number(discountRaw) / 100;
+
     const formData = {
-      quantity: this.medicineForm.get('quantity')?.value,
-      discount: this.medicineForm.get('discount')?.value
+      quantity: Number(this.medicineForm.get('quantity')?.value),
+      discount: discountToSend
     };
 
-    // console.log('Submitting medicine update:', formData);
+    console.log('🔍 Form Raw Discount (UI):', discountRaw);
+    console.log('🔍 Discount Sent to API (decimal):', discountToSend);
+    console.log('🔍 FormData Sent:', formData);
 
     this.http.put(
       `http://www.PharmaAtOncePreDeploy.somee.com/api/WarehouseMedicine/UpdateMedicine/${this.medicineId}?warehouseId=${this.warehouseId}`,
       formData,
       { responseType: 'text' }
     ).subscribe({
-      next: (res) => {
-        alert('تم تحديث الدواء بنجاح.✅✅');
+      next: () => {
+        alert('تم تحديث الدواء بنجاح ✅');
         this.router.navigate(['/dashboard/medicines']);
       },
       error: (err) => {
+        console.error('❌ Update Error:', err);
         alert('حدث خطأ أثناء تحديث الدواء. تأكد من صحة البيانات.');
         this.submitting = false;
       }
     });
   }
 
-  // Helper methods for validation
   getQuantityError(): string {
     const control = this.medicineForm.get('quantity');
     if (control?.errors && control.touched) {
@@ -190,9 +183,4 @@ export class MedicineEditFormComponent implements OnInit {
     if (this.isWarehouseTrusted) return 'المستودع موثوق - يمكن تعديل الأدوية';
     return 'المستودع غير موثوق - لا يمكن تعديل الأدوية';
   }
-
-  getTrustStatusClass(): string {
-    if (this.checkingTrustStatus) return 'text-info';
-    return this.isWarehouseTrusted ? 'text-success' : 'text-danger';
-  }
-} 
+}

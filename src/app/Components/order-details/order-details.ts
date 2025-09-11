@@ -19,6 +19,7 @@ interface OrderItem {
   medicineName: string;
   quantity: number;
   price: number;
+  discount: number
 }
 
 @Component({
@@ -35,8 +36,6 @@ export class OrderDetails implements OnInit {
   showAdditionalDetails: boolean = false;
   showAllDetails: boolean = false;
   updatingStatus: boolean = false; // Track status update in progress
-
-
 
   constructor(
     private route: ActivatedRoute,
