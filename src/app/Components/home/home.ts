@@ -166,7 +166,7 @@ export class Home implements OnInit {
         this.loading = false;
       })
       .catch((error) => {
-        this.error = error.message;
+        this.error = null;
         this.loading = false;
       });
   }

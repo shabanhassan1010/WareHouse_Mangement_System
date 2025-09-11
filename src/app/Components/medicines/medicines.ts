@@ -136,8 +136,8 @@ export class MedicinesComponent implements OnInit {
     this.applyFilters();
   }
 
-  getDrugText(Drug: number): string {
-    switch (Drug) {
+  getDrugText(drug: number): string {
+    switch (drug) {
       case 0:
         return 'مستحضرات تجميل';
       case 1:
@@ -264,7 +264,7 @@ export class MedicinesComponent implements OnInit {
       const medicinesToUpload = filteredData.map((row: any) => ({
         medicineId: Number(row['ID']),
         quantity: Number(row['Quantity']),
-        discount: Number(row['Discount']),
+        discount: Number(row['Discount'])/100,
       }));
 
       // Fetch medicine details and prepare for display
@@ -289,9 +289,9 @@ export class MedicinesComponent implements OnInit {
             // console.log('Fetched medicine data:', medData);
 
             // ✅ check if Drug matches DB value
-            if (Number(row['Drug']) !== medData.drug) {
+            if (Number(row['drug']) !== medData.drug) {
               alert(
-                ` الدواء ID ${row['ID']} له قيمة Drug مختلفة عن قاعدة البيانات (ملف: ${row['Drug']} - DB: ${medData.drug})⚠️⚠️`
+                ` الدواء ID ${row['ID']} له قيمة Drug مختلفة عن قاعدة البيانات (ملف: ${row['drug']} - DB: ${medData.drug})⚠️⚠️`
               );
             }
 
@@ -306,12 +306,11 @@ export class MedicinesComponent implements OnInit {
               medicineId: Number(row['ID']),
               arabicMedicineName: row['product_name'],
               englishMedicineName: row['product_name_en'],
-              Drug: Number(row['Drug']),
+              drug: Number(row['drug']),
               price: medData.price,
-              finalprice:
-                medData.price - medData.price * Number(row['Discount']),
+              finalprice: medData.price - medData.price * Number(row['Discount']), 
               quantity: Number(row['Quantity']),
-              discount: Number(row['Discount']) * 100,
+              discount: Number(row['Discount']),
             };
           } catch (err) {
             return null;
@@ -324,12 +323,12 @@ export class MedicinesComponent implements OnInit {
       // ✅ Check if there are changes before sending to server
       const changesExist = this.hasChanges(validMedicines, this.allMedicines);
 
-      if (!changesExist) {
-        alert(' ملحوظةالملف مرفوع بالفعل ولا يحتوي على أي تغييرات.⚠️⚠️');
-        this.uploading = false;
-        if (event.target) event.target.value = '';
-        return;
-      }
+      // if (!changesExist) {
+      //   alert(' ملحوظةالملف مرفوع بالفعل ولا يحتوي على أي تغييرات.⚠️⚠️');
+      //   this.uploading = false;
+      //   if (event.target) event.target.value = '';
+      //   return;
+      // }
 
       // Update local state (merge updates)
       validMedicines.forEach((newMed) => {

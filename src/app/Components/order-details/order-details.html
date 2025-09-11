@@ -322,7 +322,9 @@
                               <span class="badge bg-info">{{ medicine.quantity }}</span>
                             </td>
                             <td>
-                              <span class="fw-bold text-primary">${{ medicine.price.toFixed(2) }}</span>
+                              <span class="fw-bold text-primary">  
+                                {{ medicine.price * (1 - medicine.discount) | number:'1.2-2' }}
+                              </span>
                             </td>
                             <td>
                               <span class="fw-bold text-success">${{ (medicine.quantity * medicine.price).toFixed(2) }}</span>
@@ -395,12 +397,13 @@
               </button>
               <div>
 
-                <button
+             <button
                 class="btn btn-primary"
                 *ngIf="invoiceData.length > 0 && (order.status === 'Preparing' || order.status === 'Delivering')"
                 (click)="printOrderPdf()">
                 <i class="la la-print"></i> Print PDF
               </button>
+              
               <button class="btn btn-warning order-btn me-2" 
                       (click)="updateOrderStatus('Preparing')"
                       [disabled]="updatingStatus || !isStatusChangeAllowed('Preparing')">

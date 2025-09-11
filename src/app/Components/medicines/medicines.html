@@ -64,14 +64,18 @@
     </div>
   </div>
 
-  <!-- Upload Excel -->
-  <div class="mb-3 d-flex align-items-center justify-content-start">
-    <label class="btn btn-primary mb-0 fw-bold" [class.disabled]="uploading">
-      <i class="fas fa-file-upload me-1"></i>
-      Upload Your Excel Sheet
-      <input type="file" accept=".xls,.xlsx" (change)="onExcelUpload($event)" hidden [disabled]="uploading">
-    </label>
-    <span class="ms-3 text-muted fw-bold" *ngIf="uploadedFileName">{{ uploadedFileName }}</span>
+  <!-- Upload Excel Section -->
+  <div class="mb-3 d-flex align-items-center justify-content-start" *ngIf="isWarehouseTrusted">
+  <label class="btn btn-primary mb-0 fw-bold" [class.disabled]="uploading">
+    <i class="fas fa-file-upload me-1"></i>
+    Upload Your Excel Sheet
+    <input type="file" accept=".xls,.xlsx" (change)="onExcelUpload($event)" hidden [disabled]="uploading">
+  </label>
+  <span class="ms-3 text-muted fw-bold" *ngIf="uploadedFileName">{{ uploadedFileName }}</span>
+  </div>
+
+  <div class="alert alert-warning fw-bold" *ngIf="!isWarehouseTrusted && !checkingTrustStatus">
+    <i class="fas fa-lock me-2"></i> لا يمكنك رفع ملف Excel لأن المستودع غير موثوق
   </div>
 
   <!-- Loading indicator during upload -->
@@ -108,8 +112,8 @@
               {{ getDrugText(medicine.drug) }}
             </span>
           </td>
-          <td>{{ medicine.price | number:'1.2-2' }}</td>
-          <td>{{ medicine.finalprice | number:'1.2-2' }}</td>
+          <td>{{ medicine.price    | number:'1.2-2' }}</td>
+          <td>{{ medicine.price * (1 - medicine.discount) | number:'1.2-2' }}</td>
           <td>
             <span class="badge"
                   [class.bg-success]="medicine.quantity > 10"
@@ -118,7 +122,7 @@
               {{ medicine.quantity }}
             </span>
           </td>
-          <td>{{ medicine.discount | number:'1.0-0' }}%</td>
+          <td>{{ (medicine.discount * 100) | number:'1.0-0' }}%</td>
           <td>
             <div class="btn-group" role="group">
               <button class="btn btn-sm btn-outline-primary"
